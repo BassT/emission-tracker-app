@@ -16,6 +16,7 @@ export function TransportDetailsScreen({
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [specificEmissions, setSpecificEmissions] = useState("0.0");
   const [distance, setDistance] = useState("0.0");
+  const [persons, setPersons] = useState("1");
   const [totalFuelConsumption, setTotalFuelConsumption] = useState("0.0");
   const [specificFuelConsumption, setSpecificFuelConsumption] = useState("0.0");
 
@@ -29,6 +30,7 @@ export function TransportDetailsScreen({
     totalFuelConsumption: 0,
     totalEmissions: 0,
     calcMode: CalcMode.SpecificEmissions,
+    persons: 1,
   });
 
   return (
@@ -246,17 +248,31 @@ export function TransportDetailsScreen({
                     />
                   </>
                 ) : null}
-                <View style={{ marginTop: 16 }}>
-                  <TextInput
-                    label="Total emissions"
-                    value={totalEmissionsReducerState.totalEmissions.toString()}
-                    disabled
-                    keyboardType="numeric"
-                    selectTextOnFocus
-                    right={<TextInput.Affix text="kg CO2" />}
-                    style={{ marginBottom: 16 }}
-                  />
-                </View>
+                <TextInput
+                  label="Persons in vehicle"
+                  value={persons}
+                  onChangeText={(text) => {
+                    setPersons(text);
+                    if (!isNaN(parseInt(text)) && parseInt(text) > 0)
+                      dispatchTotalEmissionsReducerAction({
+                        type: "setPersons",
+                        payload: { persons: parseInt(text) },
+                      });
+                  }}
+                  keyboardType="numeric"
+                  selectTextOnFocus
+                  error={isNaN(parseInt(persons)) || parseInt(persons) < 1}
+                  style={{ marginBottom: 8, marginTop: 24 }}
+                />
+                <TextInput
+                  label="Total emissions"
+                  value={totalEmissionsReducerState.totalEmissions.toString()}
+                  disabled
+                  keyboardType="numeric"
+                  selectTextOnFocus
+                  right={<TextInput.Affix text="kg CO2" />}
+                  style={{ marginBottom: 16 }}
+                />
                 <View style={{ display: "flex", alignItems: "flex-end" }}>
                   <Button
                     onPress={() =>
@@ -307,6 +323,7 @@ interface TotalEmissionReducerState {
   totalFuelConsumption: number;
   totalEmissions: number;
   calcMode: CalcMode;
+  persons: number;
 }
 
 interface EmissionReducertSetDistanceAction {
@@ -351,13 +368,21 @@ interface EmissionReducerSetCalcModeAction {
   };
 }
 
+interface EmissionReducerSetPersonsAction {
+  type: "setPersons";
+  payload: {
+    persons: number;
+  };
+}
+
 type TotalEmissionReducerAction =
   | EmissionReducertSetDistanceAction
   | EmissionReducerSetSpecificEmissionsAction
   | EmissionReducerSetFuelTypeAction
   | EmissionReducerSetSpecificFuelConsumptionAction
   | EmissionReducerSetTotalFuelConsumptionAction
-  | EmissionReducerSetCalcModeAction;
+  | EmissionReducerSetCalcModeAction
+  | EmissionReducerSetPersonsAction;
 
 function totalEmissionReducer(
   state: TotalEmissionReducerState,
@@ -369,17 +394,20 @@ function totalEmissionReducer(
         return {
           ...state,
           distance: action.payload.distance,
-          totalEmissions:
-            (state.specificFuelConsumption / 100) *
-            action.payload.distance *
-            getSpecificEmissionsByFuelType(state.fuelType),
+          totalEmissions: calculateTotalEmissions({
+            ...state,
+            distance: action.payload.distance,
+          }),
           totalFuelConsumption: (state.specificFuelConsumption / 100) * action.payload.distance,
         };
       } else if (state.calcMode === CalcMode.SpecificEmissions) {
         return {
           ...state,
           distance: action.payload.distance,
-          totalEmissions: (state.specificEmissions / 1000) * action.payload.distance,
+          totalEmissions: calculateTotalEmissions({
+            ...state,
+            distance: action.payload.distance,
+          }),
         };
       }
       return state;
@@ -388,51 +416,83 @@ function totalEmissionReducer(
         return {
           ...state,
           specificEmissions: action.payload.specificEmissions,
-          totalEmissions: (action.payload.specificEmissions / 1000) * state.distance,
+          totalEmissions: calculateTotalEmissions({
+            ...state,
+            specificEmissions: action.payload.specificEmissions,
+          }),
         };
       }
       return { ...state };
     case "setFuelType":
-      if (state.calcMode === CalcMode.SpecificFuel) {
-        return {
-          ...state,
-          fuelType: action.payload.fuelType,
-          totalEmissions:
-            (state.specificFuelConsumption / 100) *
-            state.distance *
-            getSpecificEmissionsByFuelType(action.payload.fuelType),
-        };
-      } else if (state.calcMode === CalcMode.TotalFuel) {
-        return {
-          ...state,
-          fuelType: action.payload.fuelType,
-          totalEmissions: state.totalFuelConsumption * getSpecificEmissionsByFuelType(action.payload.fuelType),
-        };
-      }
       return {
         ...state,
         fuelType: action.payload.fuelType,
+        totalEmissions: calculateTotalEmissions({
+          ...state,
+          fuelType: action.payload.fuelType,
+        }),
       };
     case "setSpecificFuelConsumption":
       return {
         ...state,
         specificFuelConsumption: action.payload.specificFuelConsumption,
-        totalEmissions:
-          (action.payload.specificFuelConsumption / 100) *
-          state.distance *
-          getSpecificEmissionsByFuelType(state.fuelType),
+        totalEmissions: calculateTotalEmissions({
+          ...state,
+          specificFuelConsumption: action.payload.specificFuelConsumption,
+        }),
       };
     case "setTotalFuelConsumption":
       return {
         ...state,
         totalFuelConsumption: action.payload.totalFuelConsumption,
-        totalEmissions: action.payload.totalFuelConsumption * getSpecificEmissionsByFuelType(state.fuelType),
+        totalEmissions: calculateTotalEmissions({
+          ...state,
+          totalFuelConsumption: action.payload.totalFuelConsumption,
+        }),
       };
     case "setCalcMode":
-      // TODO refresh total emissions based on calc mode
-      return { ...state, calcMode: action.payload.calcMode };
+      return {
+        ...state,
+        calcMode: action.payload.calcMode,
+        totalEmissions: calculateTotalEmissions({ ...state, calcMode: action.payload.calcMode }),
+      };
+    case "setPersons":
+      return {
+        ...state,
+        persons: action.payload.persons,
+        totalEmissions: calculateTotalEmissions({ ...state, persons: action.payload.persons }),
+      };
     default:
       return state;
+  }
+}
+
+function calculateTotalEmissions({
+  calcMode,
+  specificEmissions,
+  distance,
+  totalFuelConsumption,
+  fuelType,
+  specificFuelConsumption,
+  persons,
+}: {
+  calcMode: CalcMode;
+  specificEmissions: number;
+  distance: number;
+  totalFuelConsumption: number;
+  fuelType: FuelType;
+  specificFuelConsumption: number;
+  persons: number;
+}) {
+  switch (calcMode) {
+    case CalcMode.SpecificEmissions:
+      return ((specificEmissions / 1000) * distance) / persons;
+    case CalcMode.TotalFuel:
+      return (totalFuelConsumption * getSpecificEmissionsByFuelType(fuelType)) / persons;
+    case CalcMode.SpecificFuel:
+      return ((specificFuelConsumption / 100) * distance * getSpecificEmissionsByFuelType(fuelType)) / persons;
+    default:
+      return 0;
   }
 }
 
