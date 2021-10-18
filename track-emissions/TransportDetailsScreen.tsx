@@ -1,15 +1,21 @@
 import DateTimePicker, { Event } from "@react-native-community/datetimepicker";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useReducer, useState } from "react";
+import React, { useContext, useReducer, useState } from "react";
 import { Reducer } from "react";
 import { Alert, ImageBackground, View } from "react-native";
 import { Button, Card, TextInput } from "react-native-paper";
+import { CalcMode, FuelType } from "../api";
+import { AppContext } from "../App";
 import { NavigatorParamList, ScreenName } from "../navigation";
+import { getSpecificEmissionsByFuelType } from "./FuelType";
 import { toInitialTitle } from "./TransportMode";
 
 export function TransportDetailsScreen({
+  navigation,
   route,
 }: NativeStackScreenProps<NavigatorParamList, ScreenName.TRANSPORT_DETAILS>) {
+  const { transportActivityAPI, naiveAuthUserId } = useContext(AppContext);
+
   const [title, setTitle] = useState(toInitialTitle(route.params.mode));
   const [date, setDate] = useState(new Date());
   const [dateString, setDateString] = useState(date.toLocaleDateString());
@@ -32,6 +38,28 @@ export function TransportDetailsScreen({
     calcMode: CalcMode.SpecificEmissions,
     persons: 1,
   });
+
+  const handlePressSave = async () => {
+    try {
+      const { activityId, errors } = await transportActivityAPI.createTransportActivity({
+        data: { title, date: date.toISOString(), ...totalEmissionsReducerState },
+        options: { naiveAuthUserId },
+      });
+      if (errors) {
+        Alert.alert("Failed to create transport activity", JSON.stringify(errors, null, 2));
+      }
+      if (activityId) {
+        Alert.alert("Created transport activity", `ID: ${activityId}`, [
+          { text: "OK", onPress: () => navigation.navigate(ScreenName.DASHBOARD) },
+        ]);
+      }
+    } catch (error) {
+      console.error(
+        "Unexpected error occurred trying to create transport activity",
+        JSON.stringify({ error }, null, 2)
+      );
+    }
+  };
 
   return (
     <>
@@ -274,24 +302,7 @@ export function TransportDetailsScreen({
                   style={{ marginBottom: 16 }}
                 />
                 <View style={{ display: "flex", alignItems: "flex-end" }}>
-                  <Button
-                    onPress={() =>
-                      Alert.alert(
-                        "Not yet implemented",
-                        `Will save:\n${JSON.stringify(
-                          {
-                            title,
-                            date,
-                            ...totalEmissionsReducerState,
-                          },
-                          null,
-                          2
-                        )}`
-                      )
-                    }
-                  >
-                    Save
-                  </Button>
+                  <Button onPress={handlePressSave}>Save</Button>
                 </View>
               </Card.Content>
             </Card>
@@ -494,24 +505,4 @@ function calculateTotalEmissions({
     default:
       return 0;
   }
-}
-
-enum CalcMode {
-  SpecificEmissions,
-  TotalFuel,
-  SpecificFuel,
-}
-
-enum FuelType {
-  Diesel,
-  Gasoline,
-}
-
-// const lpgSpecificEmissions = 1.64; // kg / l
-// const cngSpecificEmissions = 2.79; // kg / kg
-
-function getSpecificEmissionsByFuelType(fuelType: FuelType) {
-  if (fuelType === FuelType.Diesel) return 2.33; // kg / l
-  if (fuelType === FuelType.Gasoline) return 2.64; // kg / l
-  return 0;
 }
