@@ -1,7 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
-import React, { createContext } from "react";
+import React from "react";
 import { Provider as PaperProvider } from "react-native-paper";
-import { TransportActivityAPI } from "./api";
+import { AppContext, appContextDefault } from "./AppContext";
 import { DashboardScreen } from "./dashboard/DashboardScreen";
 import { Navigator, ScreenName } from "./navigation";
 import { theme } from "./theme";
@@ -9,13 +9,6 @@ import { TrackEmissionsScreen } from "./track-emissions/TrackEmissionsScreen";
 import { TransportDetailsScreen } from "./track-emissions/TransportDetailsScreen";
 import { toHeaderTitle } from "./track-emissions/TransportMode";
 import { TransportModeScreen } from "./track-emissions/TransportModeScreen";
-
-const appContextDefault = {
-  transportActivityAPI: new TransportActivityAPI("http://192.168.0.83:3000/api/transport-activity"),
-  naiveAuthUserId: "123",
-};
-
-export const AppContext = createContext(appContextDefault);
 
 export default function App() {
   return (

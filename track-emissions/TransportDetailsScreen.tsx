@@ -5,7 +5,7 @@ import { Reducer } from "react";
 import { Alert, ImageBackground, View } from "react-native";
 import { Button, Card, TextInput } from "react-native-paper";
 import { CalcMode, FuelType } from "../api";
-import { AppContext } from "../App";
+import { AppContext } from "../AppContext";
 import { NavigatorParamList, ScreenName } from "../navigation";
 import { getSpecificEmissionsByFuelType } from "./FuelType";
 import { toInitialTitle } from "./TransportMode";
