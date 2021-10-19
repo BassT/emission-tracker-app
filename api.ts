@@ -1,8 +1,36 @@
+export interface ListResultItem {
+  id: string;
+  totalEmissions?: number;
+  title?: string;
+  date?: string;
+}
+
 export class TransportActivityAPI {
   constructor(private baseURL: string) {}
 
-  listTransportAcitivites() {
-    throw new Error("Not yet implemented");
+  async listTransportAcitivites({
+    params,
+    options,
+  }: {
+    params: { totalEmissions?: boolean; dateAfter?: Date };
+    options: { naiveAuthUserId: string };
+  }): Promise<{
+    result?: Array<ListResultItem>;
+    errors?: Error[];
+  }> {
+    let searchParams: string[] = [];
+    if (params.totalEmissions) {
+      searchParams = [...searchParams, "totalEmissions=true"];
+    }
+    if (params.dateAfter) {
+      searchParams = [...searchParams, `dateAfter=${params.dateAfter.toISOString()}`];
+    }
+    const response = await fetch(`${this.baseURL}?${searchParams.join("&")}`, {
+      method: "GET",
+      headers: { "x-naive-auth": options.naiveAuthUserId },
+    });
+    if (response.ok) return { result: await response.json() };
+    return { errors: await response.json() };
   }
 
   async createTransportActivity({
