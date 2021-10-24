@@ -1,4 +1,6 @@
 import DateTimePicker, { Event } from "@react-native-community/datetimepicker";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { CompositeScreenProps } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useContext, useReducer, useState } from "react";
 import { Reducer } from "react";
@@ -6,14 +8,22 @@ import { Alert, ImageBackground, View } from "react-native";
 import { Button, Card, TextInput } from "react-native-paper";
 import { CalcMode, FuelType } from "../api";
 import { AppContext } from "../AppContext";
-import { NavigatorParamList, ScreenName } from "../navigation";
+import {
+  MainNavigatorParamList,
+  MainScreenName,
+  TrackEmissionsNavigatorParamList,
+  TrackEmissionsScreenName,
+} from "../navigation";
 import { getSpecificEmissionsByFuelType } from "./FuelType";
 import { toInitialTitle } from "./TransportMode";
 
 export function TransportDetailsScreen({
   navigation,
   route,
-}: NativeStackScreenProps<NavigatorParamList, ScreenName.TRANSPORT_DETAILS>) {
+}: CompositeScreenProps<
+  NativeStackScreenProps<TrackEmissionsNavigatorParamList, TrackEmissionsScreenName.TRANSPORT_DETAILS>,
+  BottomTabScreenProps<MainNavigatorParamList>
+>) {
   const { transportActivityAPI, naiveAuthUserId } = useContext(AppContext);
 
   const [title, setTitle] = useState(toInitialTitle(route.params.mode));
@@ -50,7 +60,7 @@ export function TransportDetailsScreen({
       }
       if (activityId) {
         Alert.alert("Created transport activity", `ID: ${activityId}`, [
-          { text: "OK", onPress: () => navigation.navigate(ScreenName.DASHBOARD) },
+          { text: "OK", onPress: () => navigation.jumpTo(MainScreenName.DASHBOARD) },
         ]);
       }
     } catch (error) {

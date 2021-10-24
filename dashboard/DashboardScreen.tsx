@@ -6,9 +6,11 @@ import { Alert, ImageBackground, View } from "react-native";
 import { Button, Card, Paragraph, Title, Text } from "react-native-paper";
 import { ListResultItem } from "../api";
 import { AppContext } from "../AppContext";
-import { NavigatorParamList, ScreenName } from "../navigation";
+import { MainNavigatorParamList, MainScreenName, TrackEmissionsScreenName } from "../navigation";
 
-export function DashboardScreen({ navigation }: NativeStackScreenProps<NavigatorParamList, ScreenName.DASHBOARD>) {
+export function DashboardScreen({
+  navigation,
+}: NativeStackScreenProps<MainNavigatorParamList, MainScreenName.DASHBOARD>) {
   const { transportActivityAPI, naiveAuthUserId } = useContext(AppContext);
   const [items, setItems] = useState<null | ListResultItem[]>(null);
 
@@ -57,7 +59,15 @@ export function DashboardScreen({ navigation }: NativeStackScreenProps<Navigator
               </Card.Content>
             </Card>
             <View style={{ padding: 16 }}>
-              <Button icon="plus" mode="contained" onPress={() => navigation.navigate(ScreenName.TRACK_EMISSIONS)}>
+              <Button
+                icon="plus"
+                mode="contained"
+                onPress={() =>
+                  navigation.navigate(MainScreenName.TRACK_EMISSIONS, {
+                    screen: TrackEmissionsScreenName.TRACK_EMISSIONS,
+                  })
+                }
+              >
                 Track emissions
               </Button>
             </View>

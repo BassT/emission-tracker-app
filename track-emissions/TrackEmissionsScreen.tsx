@@ -1,13 +1,18 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { CompositeScreenProps } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React from "react";
 import { View, ImageBackground } from "react-native";
 import { Card, Title } from "react-native-paper";
-import { NavigatorParamList, ScreenName } from "../navigation";
+import { MainNavigatorParamList, TrackEmissionsNavigatorParamList, TrackEmissionsScreenName } from "../navigation";
 
 export function TrackEmissionsScreen({
   navigation,
-}: NativeStackScreenProps<NavigatorParamList, ScreenName.TRACK_EMISSIONS>) {
+}: CompositeScreenProps<
+  NativeStackScreenProps<TrackEmissionsNavigatorParamList, TrackEmissionsScreenName.TRACK_EMISSIONS>,
+  BottomTabScreenProps<MainNavigatorParamList>
+>) {
   return (
     <>
       <View style={{ flex: 1 }}>
@@ -20,7 +25,7 @@ export function TrackEmissionsScreen({
           style={{ flex: 1 }}
         >
           <View style={{ padding: 8 }}>
-            <Card onPress={() => navigation.navigate(ScreenName.TRANSPORT_MODE)}>
+            <Card onPress={() => navigation.push(TrackEmissionsScreenName.TRANSPORT_MODE)}>
               <Card.Content>
                 <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
                   <MaterialCommunityIcons name="car" size={32} />
