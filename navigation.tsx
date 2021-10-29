@@ -6,12 +6,14 @@ import { TransportMode } from "./track-emissions/TransportMode";
 export const TrackEmissionsNavigator = createNativeStackNavigator<TrackEmissionsNavigatorParamList>();
 
 export type TrackEmissionsNavigatorParamList = {
+  [TrackEmissionsScreenName.OVERVIEW]: undefined;
   [TrackEmissionsScreenName.TRACK_EMISSIONS]: undefined;
   [TrackEmissionsScreenName.TRANSPORT_MODE]: undefined;
-  [TrackEmissionsScreenName.TRANSPORT_DETAILS]: { mode: TransportMode };
+  [TrackEmissionsScreenName.TRANSPORT_DETAILS]: { mode: TransportMode; transportActivityId?: string };
 };
 
 export enum TrackEmissionsScreenName {
+  OVERVIEW = "Overview",
   TRACK_EMISSIONS = "Track emissions",
   TRANSPORT_MODE = "Transport mode",
   TRANSPORT_DETAILS = "Transport details",

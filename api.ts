@@ -12,7 +12,7 @@ export class TransportActivityAPI {
     params,
     options,
   }: {
-    params: { totalEmissions?: boolean; dateAfter?: Date };
+    params: { totalEmissions?: boolean; title?: boolean; date?: boolean; dateAfter?: Date };
     options: { naiveAuthUserId: string };
   }): Promise<{
     result?: Array<ListResultItem>;
@@ -21,6 +21,12 @@ export class TransportActivityAPI {
     let searchParams: string[] = [];
     if (params.totalEmissions) {
       searchParams = [...searchParams, "totalEmissions=true"];
+    }
+    if (params.title) {
+      searchParams = [...searchParams, "title=true"];
+    }
+    if (params.date) {
+      searchParams = [...searchParams, "date=true"];
     }
     if (params.dateAfter) {
       searchParams = [...searchParams, `dateAfter=${params.dateAfter.toISOString()}`];

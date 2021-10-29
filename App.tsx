@@ -5,6 +5,7 @@ import { AppContext, appContextDefault } from "./AppContext";
 import { DashboardScreen } from "./dashboard/DashboardScreen";
 import { MainNavigator, MainScreenName, TrackEmissionsNavigator, TrackEmissionsScreenName } from "./navigation";
 import { theme } from "./theme";
+import { OverviewScreen } from "./track-emissions/OverviewScreen";
 import { TrackEmissionsScreen } from "./track-emissions/TrackEmissionsScreen";
 import { TransportDetailsScreen } from "./track-emissions/TransportDetailsScreen";
 import { toHeaderTitle } from "./track-emissions/TransportMode";
@@ -13,6 +14,7 @@ import { TransportModeScreen } from "./track-emissions/TransportModeScreen";
 function TrackEmissions() {
   return (
     <TrackEmissionsNavigator.Navigator>
+      <TrackEmissionsNavigator.Screen name={TrackEmissionsScreenName.OVERVIEW} component={OverviewScreen} />
       <TrackEmissionsNavigator.Screen
         name={TrackEmissionsScreenName.TRACK_EMISSIONS}
         component={TrackEmissionsScreen}

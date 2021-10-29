@@ -60,7 +60,11 @@ export function TransportDetailsScreen({
       }
       if (activityId) {
         Alert.alert("Created transport activity", `ID: ${activityId}`, [
-          { text: "OK", onPress: () => navigation.jumpTo(MainScreenName.DASHBOARD) },
+          {
+            text: "OK",
+            onPress: () =>
+              navigation.jumpTo(MainScreenName.TRACK_EMISSIONS, { screen: TrackEmissionsScreenName.OVERVIEW }),
+          },
         ]);
       }
     } catch (error) {

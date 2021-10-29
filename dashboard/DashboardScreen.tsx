@@ -64,7 +64,7 @@ export function DashboardScreen({
                 mode="contained"
                 onPress={() =>
                   navigation.navigate(MainScreenName.TRACK_EMISSIONS, {
-                    screen: TrackEmissionsScreenName.TRACK_EMISSIONS,
+                    screen: TrackEmissionsScreenName.OVERVIEW,
                   })
                 }
               >
