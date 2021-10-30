@@ -1,10 +1,3 @@
-export interface ListResultItem {
-  id: string;
-  totalEmissions?: number;
-  title?: string;
-  date?: string;
-}
-
 export class TransportActivityAPI {
   constructor(private baseURL: string) {}
 
@@ -66,9 +59,100 @@ export class TransportActivityAPI {
     return { errors: await response.json() };
   }
 
-  getTransportActivityDetails() {
-    throw new Error("Not yet implemented");
+  async getTransportActivityDetails({
+    params,
+    options,
+  }: {
+    params: { id: string };
+    options: { naiveAuthUserId: string };
+  }): Promise<{
+    result?: TransportDetails;
+    errors?: Error[];
+  }> {
+    const response = await fetch(`${this.baseURL}/${params.id}`, {
+      headers: { accept: "application/json", "x-naive-auth": options.naiveAuthUserId },
+    });
+    if (response.ok) return { result: await response.json() };
+    return { errors: await response.json() };
   }
+
+  async updateTransportActivity({
+    params,
+    options,
+  }: {
+    params: {
+      id: string;
+      title: string;
+      date: string;
+      distance: number;
+      specificEmissions: number;
+      fuelType: FuelType;
+      specificFuelConsumption: number;
+      totalFuelConsumption: number;
+      calcMode: CalcMode;
+      persons: number;
+      totalEmissions: number;
+    };
+    options: { naiveAuthUserId: string };
+  }): Promise<{ result?: TransportDetails; errors?: Error[] }> {
+    const response = await fetch(`${this.baseURL}/${params.id}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json", "x-naive-auth": options.naiveAuthUserId },
+      body: JSON.stringify({
+        title: params.title,
+        date: params.date,
+        distance: params.distance,
+        specificEmissions: params.specificEmissions,
+        fuelType: params.fuelType,
+        specificFuelConsumption: params.specificFuelConsumption,
+        totalFuelConsumption: params.totalFuelConsumption,
+        calcMode: params.calcMode,
+        persons: params.persons,
+        totalEmissions: params.totalEmissions,
+      }),
+    });
+    if (response.ok) return { result: await response.json() };
+    return { errors: await response.json() };
+  }
+
+  async deleteTransportActivity({
+    params,
+    options,
+  }: {
+    params: { id: string };
+    options: { naiveAuthUserId: string };
+  }): Promise<{ errors?: Error[] }> {
+    const response = await fetch(`${this.baseURL}/${params.id}`, {
+      method: "DELETE",
+      headers: { accept: "application/json", "x-naive-auth": options.naiveAuthUserId },
+    });
+    if (response.ok) return {};
+    return { errors: await response.json() };
+  }
+}
+
+export interface ListResultItem {
+  id: string;
+  totalEmissions?: number;
+  title?: string;
+  date?: string;
+}
+
+export interface TransportDetails {
+  id: string;
+  title: string;
+  date: string;
+  distance: number;
+  specificEmissions: number;
+  fuelType: FuelType;
+  specificFuelConsumption: number;
+  totalFuelConsumption: number;
+  calcMode: CalcMode;
+  persons: number;
+  totalEmissions: number;
+  createdBy: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export function extractIdOfCreatedObject(location: string | null): string {

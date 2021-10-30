@@ -1,7 +1,7 @@
 import { useFocusEffect } from "@react-navigation/core";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { subMonths } from "date-fns";
-import React, { useContext, useState } from "react";
+import { startOfDay, subMonths } from "date-fns";
+import React, { useCallback, useContext, useState } from "react";
 import { Alert, ImageBackground, View } from "react-native";
 import { Button, Card, Paragraph, Title, Text } from "react-native-paper";
 import { ListResultItem } from "../api";
@@ -14,17 +14,19 @@ export function DashboardScreen({
   const { transportActivityAPI, naiveAuthUserId } = useContext(AppContext);
   const [items, setItems] = useState<null | ListResultItem[]>(null);
 
-  useFocusEffect(() => {
-    const fetchData = async () => {
-      const { result, errors } = await transportActivityAPI.listTransportAcitivites({
-        params: { totalEmissions: true, dateAfter: subMonths(new Date(), 12) },
-        options: { naiveAuthUserId },
-      });
-      if (errors) Alert.alert("Failed to fetch total emissions.");
-      if (result) setItems(result);
-    };
-    fetchData();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        const { result, errors } = await transportActivityAPI.listTransportAcitivites({
+          params: { totalEmissions: true, dateAfter: startOfDay(subMonths(new Date(), 12)) },
+          options: { naiveAuthUserId },
+        });
+        if (errors) Alert.alert("Failed to fetch total emissions.");
+        if (result) setItems(result);
+      };
+      fetchData();
+    }, [transportActivityAPI, naiveAuthUserId])
+  );
 
   const emissionsSum =
     items?.reduce<number>((sum, item) => {

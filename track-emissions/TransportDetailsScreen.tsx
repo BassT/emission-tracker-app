@@ -1,12 +1,11 @@
 import DateTimePicker, { Event } from "@react-native-community/datetimepicker";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { CompositeScreenProps } from "@react-navigation/native";
+import { CompositeScreenProps, useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useContext, useReducer, useState } from "react";
-import { Reducer } from "react";
+import React, { Reducer, useCallback, useContext, useReducer, useState } from "react";
 import { Alert, ImageBackground, View } from "react-native";
-import { Button, Card, TextInput } from "react-native-paper";
-import { CalcMode, FuelType } from "../api";
+import { Button, Card, IconButton, Modal, Paragraph, Portal, ProgressBar, TextInput } from "react-native-paper";
+import { CalcMode, FuelType, TransportDetails } from "../api";
 import { AppContext } from "../AppContext";
 import {
   MainNavigatorParamList,
@@ -14,19 +13,24 @@ import {
   TrackEmissionsNavigatorParamList,
   TrackEmissionsScreenName,
 } from "../navigation";
+import { theme } from "../theme";
 import { getSpecificEmissionsByFuelType } from "./FuelType";
 import { toInitialTitle } from "./TransportMode";
 
 export function TransportDetailsScreen({
   navigation,
-  route,
+  route: {
+    params: { mode, transportActivityId },
+  },
 }: CompositeScreenProps<
   NativeStackScreenProps<TrackEmissionsNavigatorParamList, TrackEmissionsScreenName.TRANSPORT_DETAILS>,
   BottomTabScreenProps<MainNavigatorParamList>
 >) {
   const { transportActivityAPI, naiveAuthUserId } = useContext(AppContext);
 
-  const [title, setTitle] = useState(toInitialTitle(route.params.mode));
+  const [isLoadingInitialData, setIsLoadingInitialData] = useState(Boolean(transportActivityId));
+
+  const [title, setTitle] = useState(toInitialTitle(mode));
   const [date, setDate] = useState(new Date());
   const [dateString, setDateString] = useState(date.toLocaleDateString());
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
@@ -49,34 +53,150 @@ export function TransportDetailsScreen({
     persons: 1,
   });
 
-  const handlePressSave = async () => {
-    try {
-      const { activityId, errors } = await transportActivityAPI.createTransportActivity({
-        data: { title, date: date.toISOString(), ...totalEmissionsReducerState },
-        options: { naiveAuthUserId },
-      });
-      if (errors) {
-        Alert.alert("Failed to create transport activity", JSON.stringify(errors, null, 2));
+  useFocusEffect(
+    useCallback(() => {
+      if (transportActivityId) {
+        const fetchData = async () => {
+          setIsLoadingInitialData(true);
+          try {
+            const { result, errors } = await transportActivityAPI.getTransportActivityDetails({
+              params: { id: transportActivityId },
+              options: { naiveAuthUserId },
+            });
+            if (errors) Alert.alert("Failed to load transport details", JSON.stringify(errors, null, 2));
+            if (result) {
+              setTitle(result.title);
+              setDate(new Date(result.date));
+              setDateString(new Date(result.date).toLocaleDateString());
+              setSpecificEmissions(result.specificEmissions.toFixed(2));
+              setDistance(result.distance.toFixed(2));
+              setPersons(result.persons.toString());
+              setTotalFuelConsumption(result.totalFuelConsumption.toFixed(2));
+              setSpecificFuelConsumption(result.specificFuelConsumption.toFixed(2));
+              dispatchTotalEmissionsReducerAction({ type: "initialize", payload: result });
+            }
+          } catch (error) {
+            console.error(
+              "Unexpected error occurred trying to get transport activity details",
+              JSON.stringify({ error }, null, 2)
+            );
+          } finally {
+            setIsLoadingInitialData(false);
+          }
+        };
+
+        fetchData();
+        navigation.setOptions({
+          headerRight: () => (
+            <IconButton
+              icon="delete"
+              onPress={async () => {
+                try {
+                  const { errors } = await transportActivityAPI.deleteTransportActivity({
+                    params: { id: transportActivityId },
+                    options: { naiveAuthUserId },
+                  });
+                  if (errors) {
+                    Alert.alert("Failed to delete transport activity", JSON.stringify(errors, null, 2));
+                  }
+                  Alert.alert("Deleted transport activity successfully", "", [
+                    {
+                      text: "OK",
+                      onPress: () =>
+                        navigation.jumpTo(MainScreenName.TRACK_EMISSIONS, {
+                          screen: TrackEmissionsScreenName.OVERVIEW,
+                        }),
+                    },
+                  ]);
+                } catch (error) {
+                  console.error(
+                    "Unexpected error occurred trying to delete transport activity details",
+                    JSON.stringify({ error }, null, 2)
+                  );
+                }
+              }}
+            />
+          ),
+        });
       }
-      if (activityId) {
-        Alert.alert("Created transport activity", `ID: ${activityId}`, [
+    }, [transportActivityId])
+  );
+
+  const handlePressSave = async () => {
+    const create = async () => {
+      try {
+        const { activityId, errors } = await transportActivityAPI.createTransportActivity({
+          data: { title, date: date.toISOString(), ...totalEmissionsReducerState },
+          options: { naiveAuthUserId },
+        });
+        if (errors) {
+          Alert.alert("Failed to create transport activity", JSON.stringify(errors, null, 2));
+        }
+        if (activityId) {
+          Alert.alert("Created transport activity", `ID: ${activityId}`, [
+            {
+              text: "OK",
+              onPress: () =>
+                navigation.jumpTo(MainScreenName.TRACK_EMISSIONS, { screen: TrackEmissionsScreenName.OVERVIEW }),
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error(
+          "Unexpected error occurred trying to create transport activity",
+          JSON.stringify({ error }, null, 2)
+        );
+      }
+    };
+
+    const update = async () => {
+      if (!transportActivityId) return;
+      try {
+        const { errors } = await transportActivityAPI.updateTransportActivity({
+          params: { ...totalEmissionsReducerState, id: transportActivityId, title, date: date.toISOString() },
+          options: { naiveAuthUserId },
+        });
+        if (errors) {
+          Alert.alert("Failed to update transport activity", JSON.stringify(errors, null, 2));
+        }
+        Alert.alert("Updated transport activity successfully", "", [
           {
             text: "OK",
             onPress: () =>
               navigation.jumpTo(MainScreenName.TRACK_EMISSIONS, { screen: TrackEmissionsScreenName.OVERVIEW }),
           },
         ]);
+      } catch (error) {
+        console.error(
+          "Unexpected error occurred trying to update transport activity",
+          JSON.stringify({ error }, null, 2)
+        );
       }
-    } catch (error) {
-      console.error(
-        "Unexpected error occurred trying to create transport activity",
-        JSON.stringify({ error }, null, 2)
-      );
+    };
+
+    if (transportActivityId) {
+      update();
+    } else {
+      create();
     }
   };
 
   return (
     <>
+      <Portal>
+        <Modal
+          visible={isLoadingInitialData}
+          contentContainerStyle={{
+            backgroundColor: theme.colors.background,
+            padding: 32,
+            margin: 32,
+          }}
+        >
+          <Paragraph>Loading...</Paragraph>
+          <ProgressBar indeterminate />
+        </Modal>
+      </Portal>
+
       <View style={{ flex: 1 }}>
         <ImageBackground
           source={{
@@ -400,7 +520,13 @@ interface EmissionReducerSetPersonsAction {
   };
 }
 
+interface EmissionReducerInitializeAction {
+  type: "initialize";
+  payload: TransportDetails;
+}
+
 type TotalEmissionReducerAction =
+  | EmissionReducerInitializeAction
   | EmissionReducertSetDistanceAction
   | EmissionReducerSetSpecificEmissionsAction
   | EmissionReducerSetFuelTypeAction
@@ -414,6 +540,18 @@ function totalEmissionReducer(
   action: TotalEmissionReducerAction
 ): TotalEmissionReducerState {
   switch (action.type) {
+    case "initialize":
+      return {
+        ...state,
+        distance: action.payload.distance,
+        specificEmissions: action.payload.specificEmissions,
+        fuelType: action.payload.fuelType,
+        specificFuelConsumption: action.payload.specificFuelConsumption,
+        totalFuelConsumption: action.payload.totalFuelConsumption,
+        totalEmissions: action.payload.totalEmissions,
+        calcMode: action.payload.calcMode,
+        persons: action.payload.persons,
+      };
     case "setDistance":
       if (state.calcMode === CalcMode.SpecificFuel) {
         return {
