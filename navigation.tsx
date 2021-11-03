@@ -1,9 +1,5 @@
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigatorScreenParams } from "@react-navigation/core";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { TransportMode } from "./track-emissions/TransportMode";
-
-export const TrackEmissionsNavigator = createNativeStackNavigator<TrackEmissionsNavigatorParamList>();
 
 export type TrackEmissionsNavigatorParamList = {
   [TrackEmissionsScreenName.OVERVIEW]: undefined;
@@ -18,8 +14,6 @@ export enum TrackEmissionsScreenName {
   TRANSPORT_MODE = "Transport mode",
   TRANSPORT_DETAILS = "Transport details",
 }
-
-export const MainNavigator = createBottomTabNavigator<MainNavigatorParamList>();
 
 export type MainNavigatorParamList = {
   [MainScreenName.DASHBOARD]: undefined;

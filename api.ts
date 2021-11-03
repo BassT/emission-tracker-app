@@ -1,5 +1,5 @@
 export class TransportActivityAPI {
-  constructor(private baseURL: string) {}
+  constructor(public baseURL: string) {}
 
   async listTransportAcitivites({
     params,
@@ -35,21 +35,7 @@ export class TransportActivityAPI {
   async createTransportActivity({
     data,
     options: { naiveAuthUserId },
-  }: {
-    data: {
-      title: string;
-      date: string;
-      distance: number;
-      specificEmissions: number;
-      fuelType: FuelType;
-      specificFuelConsumption: number;
-      totalFuelConsumption: number;
-      totalEmissions: number;
-      calcMode: CalcMode;
-      persons: number;
-    };
-    options: { naiveAuthUserId: string };
-  }): Promise<{ activityId?: string; errors?: Error[] }> {
+  }: CreateTransportActivityParams): Promise<{ activityId?: string; errors?: Error[] }> {
     const response = await fetch(`${this.baseURL}`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-naive-auth": naiveAuthUserId },
@@ -131,6 +117,24 @@ export class TransportActivityAPI {
   }
 }
 
+export interface CreateTransportActivityParams {
+  data: {
+    title: string;
+    date: string;
+    distance: number;
+    specificEmissions: number;
+    fuelType: FuelType;
+    specificFuelConsumption: number;
+    totalFuelConsumption: number;
+    totalEmissions: number;
+    calcMode: CalcMode;
+    persons: number;
+  };
+  options: {
+    naiveAuthUserId: string;
+  };
+}
+
 export interface ListResultItem {
   id: string;
   totalEmissions?: number;
@@ -176,7 +180,7 @@ export function extractIdOfCreatedObject(location: string | null): string {
  *   message: "must be number"
  * }
  */
-interface Error {
+export interface Error {
   instancePath: string;
   message: string;
 }

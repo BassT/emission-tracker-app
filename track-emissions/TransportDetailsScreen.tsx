@@ -2,6 +2,7 @@ import DateTimePicker, { Event } from "@react-native-community/datetimepicker";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { startOfDay } from "date-fns";
 import React, { Reducer, useCallback, useContext, useReducer, useState } from "react";
 import { Alert, ImageBackground, View } from "react-native";
 import { Button, Card, IconButton, Modal, Paragraph, Portal, ProgressBar, TextInput } from "react-native-paper";
@@ -31,7 +32,7 @@ export function TransportDetailsScreen({
   const [isLoadingInitialData, setIsLoadingInitialData] = useState(Boolean(transportActivityId));
 
   const [title, setTitle] = useState(toInitialTitle(mode));
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(startOfDay(new Date()));
   const [dateString, setDateString] = useState(date.toLocaleDateString());
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [specificEmissions, setSpecificEmissions] = useState("0.0");
@@ -126,7 +127,7 @@ export function TransportDetailsScreen({
     const create = async () => {
       try {
         const { activityId, errors } = await transportActivityAPI.createTransportActivity({
-          data: { title, date: date.toISOString(), ...totalEmissionsReducerState },
+          data: { title, date: startOfDay(date).toISOString(), ...totalEmissionsReducerState },
           options: { naiveAuthUserId },
         });
         if (errors) {
@@ -153,7 +154,12 @@ export function TransportDetailsScreen({
       if (!transportActivityId) return;
       try {
         const { errors } = await transportActivityAPI.updateTransportActivity({
-          params: { ...totalEmissionsReducerState, id: transportActivityId, title, date: date.toISOString() },
+          params: {
+            ...totalEmissionsReducerState,
+            id: transportActivityId,
+            title,
+            date: startOfDay(date).toISOString(),
+          },
           options: { naiveAuthUserId },
         });
         if (errors) {

@@ -1,15 +1,25 @@
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { Provider as PaperProvider } from "react-native-paper";
 import { AppContext, appContextDefault } from "./AppContext";
 import { DashboardScreen } from "./dashboard/DashboardScreen";
-import { MainNavigator, MainScreenName, TrackEmissionsNavigator, TrackEmissionsScreenName } from "./navigation";
+import {
+  MainNavigatorParamList,
+  MainScreenName,
+  TrackEmissionsNavigatorParamList,
+  TrackEmissionsScreenName,
+} from "./navigation";
 import { theme } from "./theme";
 import { OverviewScreen } from "./track-emissions/OverviewScreen";
 import { TrackEmissionsScreen } from "./track-emissions/TrackEmissionsScreen";
 import { TransportDetailsScreen } from "./track-emissions/TransportDetailsScreen";
 import { toHeaderTitle } from "./track-emissions/TransportMode";
 import { TransportModeScreen } from "./track-emissions/TransportModeScreen";
+
+const TrackEmissionsNavigator = createNativeStackNavigator<TrackEmissionsNavigatorParamList>();
+const MainNavigator = createBottomTabNavigator<MainNavigatorParamList>();
 
 function TrackEmissions() {
   return (
