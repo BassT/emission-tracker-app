@@ -2,6 +2,7 @@
   "expo": {
     "name": "emission-tracker-app",
     "slug": "emission-tracker-app",
+    "scheme": "emission-tracker-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

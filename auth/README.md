@@ -1,0 +1,7 @@
+- Azure Active Directory B2C is used as identity provider (IdP)
+  - Stores local account data
+  - Connects to third-party user pools (Google, Twitter, etc.) for social login
+  - Renders user flows for sign in / sign up / password reset
+  - Issues access & refresh tokens for emission tracker API
+- The expo-auth-session package is used as client library for communication with IdP according to OpenID Connect protocol
+- Tokens are stored on device persistently
