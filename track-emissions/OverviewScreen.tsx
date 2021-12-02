@@ -1,11 +1,11 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, useFocusEffect } from "@react-navigation/core";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useCallback, useContext, useState } from "react";
-import { Alert, FlatList, ImageBackground } from "react-native";
-import { FAB, List } from "react-native-paper";
-import { ListResultItem } from "../api";
-import { AppContext } from "../AppContext";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { FlatList, ImageBackground } from "react-native";
+import { FAB, IconButton, List } from "react-native-paper";
+import { ApiContext, ListResultItem } from "../api";
+import { AuthContext } from "../auth/AuthContext";
 import { MainNavigatorParamList, TrackEmissionsNavigatorParamList, TrackEmissionsScreenName } from "../navigation";
 import { theme } from "../theme";
 import { TransportMode } from "./TransportMode";
@@ -16,24 +16,30 @@ export function OverviewScreen({
   NativeStackScreenProps<TrackEmissionsNavigatorParamList, TrackEmissionsScreenName.OVERVIEW>,
   BottomTabScreenProps<MainNavigatorParamList>
 >) {
-  const { transportActivityAPI, naiveAuthUserId } = useContext(AppContext);
+  const { logOut } = useContext(AuthContext);
+  const { transportActivityAPI, initialized } = useContext(ApiContext);
   const [data, setData] = useState<null | ListResultItem[]>(null);
 
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
-        console.log("fetchData");
         const { result, errors } = await transportActivityAPI.listTransportAcitivites({
           params: { totalEmissions: true, title: true, date: true },
-          options: { naiveAuthUserId },
+          options: {},
         });
-        if (errors) Alert.alert("Failed to fetch transport activities");
+        if (errors) console.error("Failed to fetch transport activities", { errors });
         if (result) setData(result);
       };
 
-      fetchData();
-    }, [transportActivityAPI, naiveAuthUserId])
+      if (initialized) fetchData();
+    }, [transportActivityAPI, initialized])
   );
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <IconButton icon="logout" onPress={() => logOut()} />,
+    });
+  }, [logOut, navigation]);
 
   return (
     <ImageBackground

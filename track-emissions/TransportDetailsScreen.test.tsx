@@ -2,8 +2,14 @@ import { fireEvent, render } from "@testing-library/react-native";
 import { startOfDay, startOfWeek } from "date-fns";
 import React, { EffectCallback } from "react";
 import { Provider as PaperProvider } from "react-native-paper";
-import { CalcMode, CreateTransportActivityParams, FuelType, TransportActivityAPI, TransportDetails } from "../api";
-import { AppContext } from "../AppContext";
+import {
+  ApiContext,
+  CalcMode,
+  CreateTransportActivityParams,
+  FuelType,
+  TransportActivityAPI,
+  TransportDetails,
+} from "../api";
 import { TransportDetailsScreen } from "./TransportDetailsScreen";
 import { TransportMode } from "./TransportMode";
 import * as ReactNavigationNative from "@react-navigation/native";
@@ -20,34 +26,20 @@ describe("TransportDetailsScreen", () => {
 
   it("should create transport activity correctly", async () => {
     // Setup
-    const naiveAuthUserId = "123";
     const createTransportActivityMock = jest.fn().mockResolvedValue({ activityId: "test-123" });
-    const api: TransportActivityAPI = {
-      baseURL: "",
-      listTransportAcitivites: function () {
-        throw new Error("Function not implemented.");
-      },
+    const transportActivityAPI = {
       createTransportActivity: createTransportActivityMock,
-      getTransportActivityDetails: function () {
-        throw new Error("Function not implemented.");
-      },
-      updateTransportActivity: function () {
-        throw new Error("Function not implemented.");
-      },
-      deleteTransportActivity: function () {
-        throw new Error("Function not implemented.");
-      },
-    };
+    } as unknown as TransportActivityAPI;
     const navigation: any = {};
     const route: any = { params: { mode: TransportMode.CAR } };
 
     // Test
     const { getByDisplayValue, getByText } = render(
-      <AppContext.Provider value={{ transportActivityAPI: api, naiveAuthUserId }}>
+      <ApiContext.Provider value={{ transportActivityAPI, initialized: true }}>
         <PaperProvider>
           <TransportDetailsScreen navigation={navigation} route={route} />
         </PaperProvider>
-      </AppContext.Provider>
+      </ApiContext.Provider>
     );
 
     fireEvent.changeText(getByDisplayValue("Car drive"), "Title");
@@ -55,7 +47,7 @@ describe("TransportDetailsScreen", () => {
 
     expect(createTransportActivityMock).toHaveBeenCalledTimes(1);
     const params: CreateTransportActivityParams = {
-      data: {
+      params: {
         calcMode: CalcMode.SpecificEmissions,
         date: startOfDay(new Date()).toISOString(),
         distance: 0,
@@ -67,14 +59,13 @@ describe("TransportDetailsScreen", () => {
         totalEmissions: 0,
         totalFuelConsumption: 0,
       },
-      options: { naiveAuthUserId },
+      options: {},
     };
     expect(createTransportActivityMock).toHaveBeenCalledWith(params);
   });
 
   it("should update transport activity correctly", async () => {
     // Setup
-    const naiveAuthUserId = "user-123";
     const initialDetails: TransportDetails = {
       id: "transport-activity-123",
       calcMode: CalcMode.SpecificEmissions,
@@ -87,7 +78,7 @@ describe("TransportDetailsScreen", () => {
       title: "Title",
       totalEmissions: 0.016,
       totalFuelConsumption: 0,
-      createdBy: naiveAuthUserId,
+      createdBy: "f4k3-1d",
       createdAt: startOfWeek(new Date()).toISOString(),
     };
     const newTitle = "New title";
@@ -95,30 +86,20 @@ describe("TransportDetailsScreen", () => {
     const newTotalEmissions = 0.008;
     const getTransportActivityDetailsMock = jest.fn().mockResolvedValue({ result: initialDetails });
     const updateTransportActivityMock = jest.fn().mockResolvedValue({ ...initialDetails, newTitle, newTotalEmissions });
-    const api: TransportActivityAPI = {
-      baseURL: "",
-      listTransportAcitivites: function () {
-        throw new Error("Function not implemented.");
-      },
-      createTransportActivity: function () {
-        throw new Error("Function not implemented.");
-      },
+    const transportActivityAPI = {
       getTransportActivityDetails: getTransportActivityDetailsMock,
       updateTransportActivity: updateTransportActivityMock,
-      deleteTransportActivity: function () {
-        throw new Error("Function not implemented.");
-      },
-    };
-    const navigation: any = { setOptions: () => {} };
+    } as unknown as TransportActivityAPI;
+    const navigation: any = { setOptions: () => undefined };
     const route: any = { params: { mode: TransportMode.CAR, transportActivityId: initialDetails.id } };
 
     // Test
     const { findByDisplayValue, getByDisplayValue, getByText } = render(
-      <AppContext.Provider value={{ transportActivityAPI: api, naiveAuthUserId }}>
+      <ApiContext.Provider value={{ transportActivityAPI, initialized: true }}>
         <PaperProvider>
           <TransportDetailsScreen navigation={navigation} route={route} />
         </PaperProvider>
-      </AppContext.Provider>
+      </ApiContext.Provider>
     );
 
     fireEvent.changeText(await findByDisplayValue(initialDetails.title), newTitle);
@@ -141,7 +122,7 @@ describe("TransportDetailsScreen", () => {
         totalEmissions: newTotalEmissions,
         totalFuelConsumption: 0,
       },
-      options: { naiveAuthUserId },
+      options: {},
     });
   });
 });

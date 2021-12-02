@@ -1,17 +1,18 @@
 import { useFocusEffect } from "@react-navigation/core";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { startOfDay, subMonths } from "date-fns";
-import React, { useCallback, useContext, useState } from "react";
-import { Alert, ImageBackground, View } from "react-native";
-import { Button, Card, Paragraph, Title, Text } from "react-native-paper";
-import { ListResultItem } from "../api";
-import { AppContext } from "../AppContext";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { ImageBackground, View } from "react-native";
+import { Button, Card, Paragraph, Title, Text, IconButton } from "react-native-paper";
+import { ListResultItem, ApiContext } from "../api";
+import { AuthContext } from "../auth/AuthContext";
 import { MainNavigatorParamList, MainScreenName, TrackEmissionsScreenName } from "../navigation";
 
 export function DashboardScreen({
   navigation,
 }: NativeStackScreenProps<MainNavigatorParamList, MainScreenName.DASHBOARD>) {
-  const { transportActivityAPI, naiveAuthUserId } = useContext(AppContext);
+  const { logOut } = useContext(AuthContext);
+  const { transportActivityAPI, initialized } = useContext(ApiContext);
   const [items, setItems] = useState<null | ListResultItem[]>(null);
 
   useFocusEffect(
@@ -19,14 +20,20 @@ export function DashboardScreen({
       const fetchData = async () => {
         const { result, errors } = await transportActivityAPI.listTransportAcitivites({
           params: { totalEmissions: true, dateAfter: startOfDay(subMonths(new Date(), 12)) },
-          options: { naiveAuthUserId },
+          options: {},
         });
-        if (errors) Alert.alert("Failed to fetch total emissions.");
+        if (errors) console.error("Failed to fetch total emissions.", { errors });
         if (result) setItems(result);
       };
-      fetchData();
-    }, [transportActivityAPI, naiveAuthUserId])
+      if (initialized) fetchData();
+    }, [initialized, transportActivityAPI])
   );
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <IconButton icon="logout" onPress={() => logOut()} />,
+    });
+  }, [logOut, navigation]);
 
   const emissionsSum =
     items?.reduce<number>((sum, item) => {
@@ -55,8 +62,8 @@ export function DashboardScreen({
                 <Paragraph>
                   Experts say you should aim for 2.5 tons of CO2 per year to prevent catastrophic consequences due to
                   climate warming. In the last 12 months you emitted{" "}
-                  <Text style={{ fontWeight: "bold" }}>{(emissionsSum / 2500).toFixed(2)}%</Text> of this recommended
-                  goal.
+                  <Text style={{ fontWeight: "bold" }}>{((emissionsSum / 2500) * 100).toFixed(2)}%</Text> of this
+                  recommended goal.
                 </Paragraph>
               </Card.Content>
             </Card>

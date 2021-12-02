@@ -6,8 +6,7 @@ import { startOfDay } from "date-fns";
 import React, { Reducer, useCallback, useContext, useReducer, useState } from "react";
 import { Alert, ImageBackground, View } from "react-native";
 import { Button, Card, IconButton, Modal, Paragraph, Portal, ProgressBar, TextInput } from "react-native-paper";
-import { CalcMode, FuelType, TransportDetails } from "../api";
-import { AppContext } from "../AppContext";
+import { ApiContext, CalcMode, FuelType, TransportDetails } from "../api";
 import {
   MainNavigatorParamList,
   MainScreenName,
@@ -27,7 +26,7 @@ export function TransportDetailsScreen({
   NativeStackScreenProps<TrackEmissionsNavigatorParamList, TrackEmissionsScreenName.TRANSPORT_DETAILS>,
   BottomTabScreenProps<MainNavigatorParamList>
 >) {
-  const { transportActivityAPI, naiveAuthUserId } = useContext(AppContext);
+  const { transportActivityAPI, initialized } = useContext(ApiContext);
 
   const [isLoadingInitialData, setIsLoadingInitialData] = useState(Boolean(transportActivityId));
 
@@ -62,7 +61,7 @@ export function TransportDetailsScreen({
           try {
             const { result, errors } = await transportActivityAPI.getTransportActivityDetails({
               params: { id: transportActivityId },
-              options: { naiveAuthUserId },
+              options: {},
             });
             if (errors) Alert.alert("Failed to load transport details", JSON.stringify(errors, null, 2));
             if (result) {
@@ -86,7 +85,8 @@ export function TransportDetailsScreen({
           }
         };
 
-        fetchData();
+        if (initialized) fetchData();
+
         navigation.setOptions({
           headerRight: () => (
             <IconButton
@@ -95,7 +95,7 @@ export function TransportDetailsScreen({
                 try {
                   const { errors } = await transportActivityAPI.deleteTransportActivity({
                     params: { id: transportActivityId },
-                    options: { naiveAuthUserId },
+                    options: {},
                   });
                   if (errors) {
                     Alert.alert("Failed to delete transport activity", JSON.stringify(errors, null, 2));
@@ -104,6 +104,7 @@ export function TransportDetailsScreen({
                     {
                       text: "OK",
                       onPress: () =>
+                        // eslint-disable-next-line react/prop-types
                         navigation.jumpTo(MainScreenName.TRACK_EMISSIONS, {
                           screen: TrackEmissionsScreenName.OVERVIEW,
                         }),
@@ -120,15 +121,15 @@ export function TransportDetailsScreen({
           ),
         });
       }
-    }, [transportActivityId])
+    }, [transportActivityId, navigation, transportActivityAPI, initialized])
   );
 
   const handlePressSave = async () => {
     const create = async () => {
       try {
         const { activityId, errors } = await transportActivityAPI.createTransportActivity({
-          data: { title, date: startOfDay(date).toISOString(), ...totalEmissionsReducerState },
-          options: { naiveAuthUserId },
+          params: { title, date: startOfDay(date).toISOString(), ...totalEmissionsReducerState },
+          options: {},
         });
         if (errors) {
           Alert.alert("Failed to create transport activity", JSON.stringify(errors, null, 2));
@@ -160,7 +161,7 @@ export function TransportDetailsScreen({
             title,
             date: startOfDay(date).toISOString(),
           },
-          options: { naiveAuthUserId },
+          options: {},
         });
         if (errors) {
           Alert.alert("Failed to update transport activity", JSON.stringify(errors, null, 2));
