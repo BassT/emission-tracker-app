@@ -75,7 +75,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   const discovery = useAutoDiscovery(
     "https://emissiontracker.b2clogin.com/emissiontracker.onmicrosoft.com/B2C_1_emission-tracker-app/v2.0"
   );
-  const redirectUri = makeRedirectUri({ scheme: "emission-tracker-app" });
+  const redirectUri = makeRedirectUri({ scheme: "emission-tracker-app", path: "auth" });
   const [
     request,
     response,
@@ -91,7 +91,11 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
    */
   const setTokenInfo = useCallback((tokenInfo?: TokenInfo) => {
     setTokenInfoState(tokenInfo);
-    SecureStore.setItemAsync(tokenInfoSecureStoreKey, JSON.stringify({ ...tokenInfo }));
+    if (typeof tokenInfo === "undefined") {
+      SecureStore.deleteItemAsync(tokenInfoSecureStoreKey);
+    } else {
+      SecureStore.setItemAsync(tokenInfoSecureStoreKey, JSON.stringify({ ...tokenInfo }));
+    }
   }, []);
 
   // On mount, try to restore token info from local store.
