@@ -2,7 +2,7 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, useFocusEffect } from "@react-navigation/core";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { FlatList, ImageBackground } from "react-native";
+import { Alert, FlatList, ImageBackground } from "react-native";
 import { FAB, IconButton, List } from "react-native-paper";
 import { ApiContext, ListResultItem } from "../api";
 import { AuthContext } from "../auth/AuthContext";
@@ -19,16 +19,25 @@ export function OverviewScreen({
   const { logOut } = useContext(AuthContext);
   const { transportActivityAPI, initialized } = useContext(ApiContext);
   const [data, setData] = useState<null | ListResultItem[]>(null);
+  const [loading, setLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
-        const { result, errors } = await transportActivityAPI.listTransportAcitivites({
-          params: { totalEmissions: true, title: true, date: true },
-          options: {},
-        });
-        if (errors) console.error("Failed to fetch transport activities", { errors });
-        if (result) setData(result);
+        setLoading(true);
+        try {
+          const { result, errors } = await transportActivityAPI.listTransportAcitivites({
+            params: { totalEmissions: true, title: true, date: true },
+            options: {},
+          });
+          if (errors) console.error("Failed to fetch transport activities", { errors });
+          if (result) setData(result);
+        } catch (error) {
+          console.error("Unexpected error to fetch total emissions", { error });
+          Alert.alert("Unexpected error", "An unexpected error occurred. Please try again.");
+        } finally {
+          setLoading(false);
+        }
       };
 
       if (initialized) fetchData();
@@ -66,6 +75,7 @@ export function OverviewScreen({
             }
           />
         )}
+        refreshing={loading}
       />
       <FAB
         icon="plus"
