@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -22,14 +23,9 @@ import { TransportModeScreen } from "./track-emissions/TransportModeScreen";
 const TrackEmissionsNavigator = createNativeStackNavigator<TrackEmissionsNavigatorParamList>();
 const MainNavigator = createBottomTabNavigator<MainNavigatorParamList>();
 
-// TODO Fix warning:
-// Found screens with the same name nested inside one another. Check:
-// Track emissions, Track emissions > Track emissions
-// This can cause confusing behavior during navigation. Consider using unique names for each screen instead.
-
-function TrackEmissions() {
+function Emissions() {
   return (
-    <TrackEmissionsNavigator.Navigator>
+    <TrackEmissionsNavigator.Navigator initialRouteName={TrackEmissionsScreenName.OVERVIEW}>
       <TrackEmissionsNavigator.Screen name={TrackEmissionsScreenName.OVERVIEW} component={OverviewScreen} />
       <TrackEmissionsNavigator.Screen
         name={TrackEmissionsScreenName.TRACK_EMISSIONS}
@@ -61,11 +57,23 @@ export default function App() {
           }
         >
           <NavigationContainer>
-            <MainNavigator.Navigator>
+            <MainNavigator.Navigator
+              screenOptions={({ route }) => ({
+                tabBarIcon: ({ color }) => {
+                  let iconName: "home" | "view-list" | undefined;
+                  if (route.name === MainScreenName.DASHBOARD) {
+                    iconName = "home";
+                  } else if (route.name === MainScreenName.EMISSIONS) {
+                    iconName = "view-list";
+                  }
+                  return <MaterialCommunityIcons name={iconName} size={24} color={color} />;
+                },
+              })}
+            >
               <MainNavigator.Screen name={MainScreenName.DASHBOARD} component={DashboardScreen} />
               <MainNavigator.Screen
-                name={MainScreenName.TRACK_EMISSIONS}
-                component={TrackEmissions}
+                name={MainScreenName.EMISSIONS}
+                component={Emissions}
                 options={{ headerShown: false }}
               />
             </MainNavigator.Navigator>

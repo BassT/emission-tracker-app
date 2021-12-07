@@ -32,32 +32,28 @@ export function TransportModeScreen({
             >
               <Card.Content>
                 <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
-                  <MaterialCommunityIcons name="car" size={32} />
-                  <Title>Car</Title>
+                  <View style={{ display: "flex", flexDirection: "row" }}>
+                    <MaterialCommunityIcons name="car" size={32} />
+                    <MaterialCommunityIcons name="bus" size={32} />
+                    <MaterialCommunityIcons name="motorbike" size={32} />
+                  </View>
+                  <Title>Car / Bus / Motorbike</Title>
                 </View>
               </Card.Content>
             </Card>
             <Card style={{ marginBottom: 8 }}>
               <Card.Content>
                 <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
-                  <MaterialCommunityIcons name="train" size={32} />
-                  <Title>Train</Title>
+                  <MaterialCommunityIcons name="train" size={32} style={{ color: "grey" }} />
+                  <Title style={{ color: "grey" }}>Train (coming soon)</Title>
                 </View>
               </Card.Content>
             </Card>
             <Card style={{ marginBottom: 8 }}>
               <Card.Content>
                 <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
-                  <MaterialCommunityIcons name="motorbike" size={32} />
-                  <Title>Motorbike</Title>
-                </View>
-              </Card.Content>
-            </Card>
-            <Card style={{ marginBottom: 8 }}>
-              <Card.Content>
-                <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
-                  <MaterialCommunityIcons name="airplane" size={32} />
-                  <Title>Airplane</Title>
+                  <MaterialCommunityIcons name="airplane" size={32} style={{ color: "grey" }} />
+                  <Title style={{ color: "grey" }}>Airplane (coming soon)</Title>
                 </View>
               </Card.Content>
             </Card>

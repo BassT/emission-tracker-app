@@ -90,8 +90,8 @@ export function DashboardScreen({
                 icon="plus"
                 mode="contained"
                 onPress={() =>
-                  navigation.navigate(MainScreenName.TRACK_EMISSIONS, {
-                    screen: TrackEmissionsScreenName.OVERVIEW,
+                  navigation.navigate(MainScreenName.EMISSIONS, {
+                    screen: TrackEmissionsScreenName.TRACK_EMISSIONS,
                   })
                 }
               >

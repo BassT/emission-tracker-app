@@ -28,7 +28,7 @@ export function TrackEmissionsScreen({
             <Card onPress={() => navigation.push(TrackEmissionsScreenName.TRANSPORT_MODE)}>
               <Card.Content>
                 <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
-                  <MaterialCommunityIcons name="car" size={32} />
+                  <MaterialCommunityIcons name="train-car" size={32} />
                   <Title>Transport</Title>
                 </View>
               </Card.Content>

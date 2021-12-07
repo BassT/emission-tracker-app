@@ -17,10 +17,10 @@ export enum TrackEmissionsScreenName {
 
 export type MainNavigatorParamList = {
   [MainScreenName.DASHBOARD]: undefined;
-  [MainScreenName.TRACK_EMISSIONS]: NavigatorScreenParams<TrackEmissionsNavigatorParamList>;
+  [MainScreenName.EMISSIONS]: NavigatorScreenParams<TrackEmissionsNavigatorParamList>;
 };
 
 export enum MainScreenName {
   DASHBOARD = "Dashboard",
-  TRACK_EMISSIONS = "Track emissions",
+  EMISSIONS = "Emissions",
 }

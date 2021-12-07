@@ -105,7 +105,7 @@ export function TransportDetailsScreen({
                       text: "OK",
                       onPress: () =>
                         // eslint-disable-next-line react/prop-types
-                        navigation.jumpTo(MainScreenName.TRACK_EMISSIONS, {
+                        navigation.jumpTo(MainScreenName.EMISSIONS, {
                           screen: TrackEmissionsScreenName.OVERVIEW,
                         }),
                     },
@@ -138,8 +138,7 @@ export function TransportDetailsScreen({
           Alert.alert("Created transport activity", `ID: ${activityId}`, [
             {
               text: "OK",
-              onPress: () =>
-                navigation.jumpTo(MainScreenName.TRACK_EMISSIONS, { screen: TrackEmissionsScreenName.OVERVIEW }),
+              onPress: () => navigation.jumpTo(MainScreenName.EMISSIONS, { screen: TrackEmissionsScreenName.OVERVIEW }),
             },
           ]);
         }
@@ -169,8 +168,7 @@ export function TransportDetailsScreen({
         Alert.alert("Updated transport activity successfully", "", [
           {
             text: "OK",
-            onPress: () =>
-              navigation.jumpTo(MainScreenName.TRACK_EMISSIONS, { screen: TrackEmissionsScreenName.OVERVIEW }),
+            onPress: () => navigation.jumpTo(MainScreenName.EMISSIONS, { screen: TrackEmissionsScreenName.OVERVIEW }),
           },
         ]);
       } catch (error) {
