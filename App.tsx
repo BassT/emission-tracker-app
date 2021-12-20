@@ -18,6 +18,7 @@ import { OverviewScreen } from "./track-emissions/OverviewScreen";
 import { TrackEmissionsScreen } from "./track-emissions/TrackEmissionsScreen";
 import { TransportDetailsScreen } from "./track-emissions/TransportDetailsScreen";
 import { toHeaderTitle } from "./track-emissions/TransportMode";
+import Constants from "expo-constants";
 import { TransportModeScreen } from "./track-emissions/TransportModeScreen";
 
 const TrackEmissionsNavigator = createNativeStackNavigator<TrackEmissionsNavigatorParamList>();
@@ -50,12 +51,7 @@ export default function App() {
   return (
     <PaperProvider theme={theme}>
       <AuthContextProvider>
-        <ApiContextProvider
-          baseURL={
-            // "https://emission-tracker-api.azurewebsites.net/api/transport-activity"
-            "http://192.168.0.83:3000/api/transport-activity"
-          }
-        >
+        <ApiContextProvider baseURL={Constants.manifest?.extra?.apiBaseUrl}>
           <NavigationContainer>
             <MainNavigator.Navigator
               screenOptions={({ route }) => ({

@@ -1,0 +1,23 @@
+{
+  "cli": {
+    "version": ">= 0.39.0"
+  },
+  "build": {
+    "production": {
+      "env": {
+        "API_BASE_URL": "https://emission-tracker-api.azurewebsites.net/api/transport-activity",
+        "ANDROID_PACKAGE": "de.strangeloop.emissiontracker"
+      }
+    },
+    "testing": {
+      "env": {
+        "API_BASE_URL": "https://emission-tracker-api-test.azurewebsites.net/api/transport-activity",
+        "ANDROID_PACKAGE": "de.strangeloop.emissiontrackertest",
+        "VERSION_SUFFIX": "-test"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
