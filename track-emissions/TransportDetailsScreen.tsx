@@ -29,6 +29,9 @@ export function TransportDetailsScreen({
   const { transportActivityAPI, initialized } = useContext(ApiContext);
 
   const [isLoadingInitialData, setIsLoadingInitialData] = useState(Boolean(transportActivityId));
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [title, setTitle] = useState(toInitialTitle(mode));
   const [date, setDate] = useState(startOfDay(new Date()));
@@ -93,6 +96,7 @@ export function TransportDetailsScreen({
               icon="delete"
               onPress={async () => {
                 try {
+                  setIsDeleting(true);
                   const { errors } = await transportActivityAPI.deleteTransportActivity({
                     params: { id: transportActivityId },
                     options: {},
@@ -115,6 +119,8 @@ export function TransportDetailsScreen({
                     "Unexpected error occurred trying to delete transport activity details",
                     JSON.stringify({ error }, null, 2)
                   );
+                } finally {
+                  setIsDeleting(false);
                 }
               }}
             />
@@ -127,6 +133,7 @@ export function TransportDetailsScreen({
   const handlePressSave = async () => {
     const create = async () => {
       try {
+        setIsCreating(true);
         const { activityId, errors } = await transportActivityAPI.createTransportActivity({
           params: { title, date: startOfDay(date).toISOString(), ...totalEmissionsReducerState },
           options: {},
@@ -135,7 +142,7 @@ export function TransportDetailsScreen({
           Alert.alert("Failed to create transport activity", JSON.stringify(errors, null, 2));
         }
         if (activityId) {
-          Alert.alert("Created transport activity", `ID: ${activityId}`, [
+          Alert.alert("Created transport activity", undefined, [
             {
               text: "OK",
               onPress: () => navigation.jumpTo(MainScreenName.EMISSIONS, { screen: TrackEmissionsScreenName.OVERVIEW }),
@@ -147,12 +154,15 @@ export function TransportDetailsScreen({
           "Unexpected error occurred trying to create transport activity",
           JSON.stringify({ error }, null, 2)
         );
+      } finally {
+        setIsCreating(false);
       }
     };
 
     const update = async () => {
       if (!transportActivityId) return;
       try {
+        setIsUpdating(true);
         const { errors } = await transportActivityAPI.updateTransportActivity({
           params: {
             ...totalEmissionsReducerState,
@@ -176,6 +186,8 @@ export function TransportDetailsScreen({
           "Unexpected error occurred trying to update transport activity",
           JSON.stringify({ error }, null, 2)
         );
+      } finally {
+        setIsUpdating(false);
       }
     };
 
@@ -441,7 +453,13 @@ export function TransportDetailsScreen({
                   style={{ marginBottom: 16 }}
                 />
                 <View style={{ display: "flex", alignItems: "flex-end" }}>
-                  <Button onPress={handlePressSave}>Save</Button>
+                  <Button
+                    onPress={handlePressSave}
+                    disabled={isCreating || isUpdating || isDeleting}
+                    loading={isCreating || isUpdating || isDeleting}
+                  >
+                    Save
+                  </Button>
                 </View>
               </Card.Content>
             </Card>
