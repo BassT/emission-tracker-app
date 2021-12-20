@@ -1,8 +1,9 @@
 import { exchangeCodeAsync, makeRedirectUri, TokenResponse, useAuthRequest, useAutoDiscovery } from "expo-auth-session";
+import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import React, { createContext, useCallback, useEffect, useState } from "react";
 import { View, Image } from "react-native";
-import { Button } from "react-native-paper";
+import { Button, Text } from "react-native-paper";
 import { TokenInfo } from "./TokenInfo";
 
 export interface Auth {
@@ -173,12 +174,17 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       {tokenInfo ? (
         children
       ) : (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <Image source={require("../assets/logo-banner.png")} style={{ width: 280, height: 60, marginBottom: 24 }} />
-          <Button onPress={() => authenticate({ showInRecents: true })} mode="contained">
-            Log in
-          </Button>
-        </View>
+        <>
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <Image source={require("../assets/logo-banner.png")} style={{ width: 280, height: 60, marginBottom: 24 }} />
+            <Button onPress={() => authenticate({ showInRecents: true })} mode="contained">
+              Log in
+            </Button>
+          </View>
+          <Text style={{ textAlign: "center", padding: 8, color: "lightgrey" }}>
+            {Constants.nativeAppVersion} ({Constants.nativeBuildVersion} - {Constants.appOwnership})
+          </Text>
+        </>
       )}
     </AuthContext.Provider>
   );
