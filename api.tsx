@@ -44,7 +44,14 @@ export class TransportActivityAPI {
     params,
     options,
   }: {
-    params: { totalEmissions?: boolean; title?: boolean; date?: boolean; dateAfter?: Date };
+    params: {
+      totalEmissions?: boolean;
+      title?: boolean;
+      date?: boolean;
+      dateAfter?: Date;
+      sortBy?: "date";
+      sortDirection?: "ASC" | "DESC";
+    };
     options: Options;
   }): Promise<{
     result?: Array<ListResultItem>;
@@ -68,6 +75,12 @@ export class TransportActivityAPI {
     }
     if (params.dateAfter) {
       searchParams = [...searchParams, `dateAfter=${params.dateAfter.toISOString()}`];
+    }
+    if (params.sortBy) {
+      searchParams = [...searchParams, `sortBy=${params.sortBy}`];
+    }
+    if (params.sortDirection) {
+      searchParams = [...searchParams, `sortDirection=${params.sortDirection}`];
     }
     const response = await fetch(`${this.baseURL}?${searchParams.join("&")}`, {
       method: "GET",

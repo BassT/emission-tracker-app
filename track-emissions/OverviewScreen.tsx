@@ -27,7 +27,7 @@ export function OverviewScreen({
         setLoading(true);
         try {
           const { result, errors } = await transportActivityAPI.listTransportAcitivites({
-            params: { totalEmissions: true, title: true, date: true },
+            params: { totalEmissions: true, title: true, date: true, sortBy: "date", sortDirection: "DESC" },
             options: {},
           });
           if (errors) console.error("Failed to fetch transport activities", { errors });
