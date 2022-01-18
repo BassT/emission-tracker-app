@@ -142,7 +142,7 @@ export function TransportDetailsScreen({
           Alert.alert("Failed to create transport activity", JSON.stringify(errors, null, 2));
         }
         if (activityId) {
-          Alert.alert("Created transport activity", undefined, [
+          Alert.alert("Created transport activity successfully", undefined, [
             {
               text: "OK",
               onPress: () => navigation.jumpTo(MainScreenName.EMISSIONS, { screen: TrackEmissionsScreenName.OVERVIEW }),
