@@ -34,6 +34,37 @@ export function TrackEmissionsScreen({
               </Card.Content>
             </Card>
           </View>
+          <View style={{ padding: 8 }}>
+            <Card>
+              <Card.Content>
+                <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
+                  <MaterialCommunityIcons name="home" size={32} style={{ color: "grey" }} />
+                  <Title style={{ color: "grey" }}>Housing (coming soon)</Title>
+                </View>
+              </Card.Content>
+            </Card>
+          </View>
+          <View style={{ padding: 8 }}>
+            <Card>
+              <Card.Content>
+                <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
+                  <MaterialCommunityIcons name="cart" size={32} style={{ color: "grey" }} />
+                  <Title style={{ color: "grey" }}>Products {"&"} Services</Title>
+                  <Title style={{ color: "grey" }}>(coming soon)</Title>
+                </View>
+              </Card.Content>
+            </Card>
+          </View>
+          <View style={{ padding: 8 }}>
+            <Card>
+              <Card.Content>
+                <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
+                  <MaterialCommunityIcons name="food" size={32} style={{ color: "grey" }} />
+                  <Title style={{ color: "grey" }}>Food (coming soon)</Title>
+                </View>
+              </Card.Content>
+            </Card>
+          </View>
         </ImageBackground>
       </View>
     </>
