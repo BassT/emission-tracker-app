@@ -32,7 +32,7 @@ export default {
       backgroundColor: "#1C5C5B",
     },
     package: process.env.ANDROID_PACKAGE,
-    versionCode: 4,
+    versionCode: 5,
     permissions: [],
   },
   web: {
