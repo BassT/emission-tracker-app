@@ -1,5 +1,5 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { CompositeScreenProps, useFocusEffect } from "@react-navigation/core";
+import { CompositeScreenProps } from "@react-navigation/core";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Alert, FlatList, ImageBackground } from "react-native";
@@ -21,28 +21,26 @@ export function OverviewScreen({
   const [data, setData] = useState<null | ListResultItem[]>(null);
   const [loading, setLoading] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchData = async () => {
-        setLoading(true);
-        try {
-          const { result, errors } = await transportActivityAPI.listTransportAcitivites({
-            params: { totalEmissions: true, title: true, date: true, sortBy: "date", sortDirection: "DESC" },
-            options: {},
-          });
-          if (errors) console.error("Failed to fetch transport activities", { errors });
-          if (result) setData(result);
-        } catch (error) {
-          console.error("Unexpected error to fetch total emissions", { error });
-          Alert.alert("Unexpected error", "An unexpected error occurred. Please try again.");
-        } finally {
-          setLoading(false);
-        }
-      };
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { result, errors } = await transportActivityAPI.listTransportAcitivites({
+        params: { totalEmissions: true, title: true, date: true, sortBy: "date", sortDirection: "DESC" },
+        options: {},
+      });
+      if (errors) console.error("Failed to fetch transport activities", { errors });
+      if (result) setData(result);
+    } catch (error) {
+      console.error("Unexpected error to fetch total emissions", { error });
+      Alert.alert("Unexpected error", "An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [transportActivityAPI]);
 
-      if (initialized) fetchData();
-    }, [transportActivityAPI, initialized])
-  );
+  useEffect(() => {
+    if (initialized) fetchData();
+  }, [fetchData, initialized]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -76,6 +74,7 @@ export function OverviewScreen({
           />
         )}
         refreshing={loading}
+        onRefresh={() => fetchData()}
       />
       <FAB
         icon="plus"
