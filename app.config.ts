@@ -8,7 +8,7 @@ if (!process.env.API_BASE_URL) {
 const version = "1.0.0";
 
 export default {
-  name: "emission-tracker-app",
+  name: "Emission Tracker",
   slug: "emission-tracker-app",
   scheme: "emission-tracker-app",
   version: process.env.VERSION_SUFFIX ? `${version}${process.env.VERSION_SUFFIX}` : version,
