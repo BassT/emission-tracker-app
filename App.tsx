@@ -16,7 +16,7 @@ import {
 import { theme } from "./theme";
 import { OverviewScreen } from "./track-emissions/OverviewScreen";
 import { TrackEmissionsScreen } from "./track-emissions/TrackEmissionsScreen";
-import { TransportDetailsScreen } from "./track-emissions/TransportDetailsScreen";
+import { TransportDetailsCarScreen } from "./track-emissions/TransportDetailsCarScreen";
 import { toHeaderTitle } from "./track-emissions/TransportMode";
 import Constants from "expo-constants";
 import { TransportModeScreen } from "./track-emissions/TransportModeScreen";
@@ -40,7 +40,7 @@ function Emissions() {
       />
       <TrackEmissionsNavigator.Screen
         name={TrackEmissionsScreenName.TRANSPORT_DETAILS}
-        component={TransportDetailsScreen}
+        component={TransportDetailsCarScreen}
         options={({ route }) => ({ title: toHeaderTitle(route.params.mode), animation: "slide_from_right" })}
       />
     </TrackEmissionsNavigator.Navigator>

@@ -10,7 +10,7 @@ import {
   TransportActivityAPI,
   TransportDetails,
 } from "../api";
-import { TransportDetailsScreen } from "./TransportDetailsScreen";
+import { TransportDetailsCarScreen } from "./TransportDetailsCarScreen";
 import { TransportMode } from "./TransportMode";
 import * as ReactNavigationNative from "@react-navigation/native";
 
@@ -19,7 +19,7 @@ const ReactNavigationNativeMock = ReactNavigationNative as jest.Mocked<typeof Re
 const useFocusEffectMock = jest.fn();
 ReactNavigationNativeMock.useFocusEffect = useFocusEffectMock;
 
-describe("TransportDetailsScreen", () => {
+describe(TransportDetailsCarScreen.name, () => {
   beforeEach(() => {
     useFocusEffectMock.mockImplementationOnce((callback: EffectCallback) => callback());
   });
@@ -37,7 +37,7 @@ describe("TransportDetailsScreen", () => {
     const { getByDisplayValue, getByText } = render(
       <ApiContext.Provider value={{ transportActivityAPI, initialized: true }}>
         <PaperProvider>
-          <TransportDetailsScreen navigation={navigation} route={route} />
+          <TransportDetailsCarScreen navigation={navigation} route={route} />
         </PaperProvider>
       </ApiContext.Provider>
     );
@@ -97,7 +97,7 @@ describe("TransportDetailsScreen", () => {
     const { findByDisplayValue, getByDisplayValue, getByText } = render(
       <ApiContext.Provider value={{ transportActivityAPI, initialized: true }}>
         <PaperProvider>
-          <TransportDetailsScreen navigation={navigation} route={route} />
+          <TransportDetailsCarScreen navigation={navigation} route={route} />
         </PaperProvider>
       </ApiContext.Provider>
     );
