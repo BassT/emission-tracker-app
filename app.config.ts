@@ -5,7 +5,7 @@ if (!process.env.API_BASE_URL) {
   // process.env.API_BASE_URL = "https://emission-tracker-api.azurewebsites.net/api/transport-activity";
 }
 
-const version = "1.0.0";
+const version = "1.1.0";
 
 export default {
   name: "Emission Tracker",
@@ -32,7 +32,7 @@ export default {
       backgroundColor: "#1C5C5B",
     },
     package: process.env.ANDROID_PACKAGE,
-    versionCode: 5,
+    versionCode: 6,
     permissions: [],
   },
   web: {
