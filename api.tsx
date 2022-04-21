@@ -331,6 +331,8 @@ export enum CalcMode {
 export enum FuelType {
   Diesel = "Diesel",
   Gasoline = "Gasoline",
+  LPG = "LPG",
+  CNG = "CNG",
 }
 
 enum STATUS_CODE {

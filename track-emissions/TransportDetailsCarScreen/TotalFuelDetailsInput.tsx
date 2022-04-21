@@ -1,8 +1,9 @@
 import React from "react";
 import { View } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import { TextInput } from "react-native-paper";
 import { FuelType } from "../../api";
-import { TotalEmissionReducerState, TotalEmissionReducerAction } from "./totalEmissionReducer";
+import { FuelTypeButton } from "./FuelTypeButton";
+import { TotalEmissionReducerAction, TotalEmissionReducerState } from "./totalEmissionReducer";
 
 export function TotalFuelDetailsInput({
   totalEmissionsReducerState,
@@ -18,28 +19,14 @@ export function TotalFuelDetailsInput({
   return (
     <>
       <View style={{ display: "flex", flexDirection: "row", marginBottom: 8 }}>
-        <Button
-          mode={totalEmissionsReducerState.fuelType === FuelType.Diesel ? "contained" : "outlined"}
-          onPress={() =>
-            dispatchTotalEmissionsReducerAction({
-              type: "setFuelType",
-              payload: { fuelType: FuelType.Diesel },
-            })
-          }
-        >
-          Diesel
-        </Button>
-        <Button
-          mode={totalEmissionsReducerState.fuelType === FuelType.Gasoline ? "contained" : "outlined"}
-          onPress={() =>
-            dispatchTotalEmissionsReducerAction({
-              type: "setFuelType",
-              payload: { fuelType: FuelType.Gasoline },
-            })
-          }
-        >
-          Gasoline
-        </Button>
+        {[FuelType.Diesel, FuelType.Gasoline, FuelType.LPG, FuelType.CNG].map((fuelType) => (
+          <FuelTypeButton
+            key={fuelType}
+            fuelType={fuelType}
+            totalEmissionsReducerState={totalEmissionsReducerState}
+            dispatchTotalEmissionsReducerAction={dispatchTotalEmissionsReducerAction}
+          />
+        ))}
       </View>
       <TextInput
         label="Total consumption"
@@ -54,9 +41,14 @@ export function TotalFuelDetailsInput({
         }}
         keyboardType="numeric"
         selectTextOnFocus
-        right={<TextInput.Affix text="l" />}
+        right={<TextInput.Affix text={getFuelUnit(totalEmissionsReducerState.fuelType)} />}
         error={isNaN(parseFloat(totalFuelConsumption))}
       />
     </>
   );
+}
+
+function getFuelUnit(fuelType: FuelType) {
+  if (fuelType === FuelType.CNG) return "kg";
+  return "l";
 }
