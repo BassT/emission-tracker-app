@@ -5,8 +5,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React from "react";
 import { View, ImageBackground } from "react-native";
 import { Card, Title } from "react-native-paper";
+import { TransportMode } from "../api";
 import { MainNavigatorParamList, TrackEmissionsNavigatorParamList, TrackEmissionsScreenName } from "../navigation";
-import { TransportMode } from "./TransportMode";
 
 export function TransportModeScreen({
   navigation,
@@ -28,24 +28,25 @@ export function TransportModeScreen({
           <View style={{ padding: 8 }}>
             <Card
               style={{ marginBottom: 8 }}
-              onPress={() => navigation.push(TrackEmissionsScreenName.TRANSPORT_DETAILS, { mode: TransportMode.CAR })}
+              onPress={() => navigation.push(TrackEmissionsScreenName.TRANSPORT_DETAILS, { mode: TransportMode.Car })}
             >
               <Card.Content>
                 <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
                   <View style={{ display: "flex", flexDirection: "row" }}>
                     <MaterialCommunityIcons name="car" size={32} />
-                    <MaterialCommunityIcons name="bus" size={32} />
-                    <MaterialCommunityIcons name="motorbike" size={32} />
                   </View>
-                  <Title>Car / Bus / Motorbike</Title>
+                  <Title>Car</Title>
                 </View>
               </Card.Content>
             </Card>
-            <Card style={{ marginBottom: 8 }}>
+            <Card
+              style={{ marginBottom: 8 }}
+              onPress={() => navigation.push(TrackEmissionsScreenName.TRANSPORT_DETAILS, { mode: TransportMode.Train })}
+            >
               <Card.Content>
                 <View style={{ padding: 16, display: "flex", alignItems: "center" }}>
-                  <MaterialCommunityIcons name="train" size={32} style={{ color: "grey" }} />
-                  <Title style={{ color: "grey" }}>Train (coming soon)</Title>
+                  <MaterialCommunityIcons name="train" size={32} />
+                  <Title>Train</Title>
                 </View>
               </Card.Content>
             </Card>

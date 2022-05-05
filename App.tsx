@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Constants from "expo-constants";
 import React from "react";
 import { Provider as PaperProvider } from "react-native-paper";
 import { ApiContextProvider } from "./api";
@@ -16,9 +17,8 @@ import {
 import { theme } from "./theme";
 import { OverviewScreen } from "./track-emissions/OverviewScreen";
 import { TrackEmissionsScreen } from "./track-emissions/TrackEmissionsScreen";
-import { TransportDetailsCarScreen } from "./track-emissions/TransportDetailsCarScreen";
+import { TransportDetailsScreen } from "./track-emissions/TransportDetailsScreen";
 import { toHeaderTitle } from "./track-emissions/TransportMode";
-import Constants from "expo-constants";
 import { TransportModeScreen } from "./track-emissions/TransportModeScreen";
 
 const TrackEmissionsNavigator = createNativeStackNavigator<TrackEmissionsNavigatorParamList>();
@@ -40,7 +40,7 @@ function Emissions() {
       />
       <TrackEmissionsNavigator.Screen
         name={TrackEmissionsScreenName.TRANSPORT_DETAILS}
-        component={TransportDetailsCarScreen}
+        component={TransportDetailsScreen}
         options={({ route }) => ({ title: toHeaderTitle(route.params.mode), animation: "slide_from_right" })}
       />
     </TrackEmissionsNavigator.Navigator>

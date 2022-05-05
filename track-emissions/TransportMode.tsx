@@ -1,20 +1,11 @@
-export enum TransportMode {
-  CAR,
-  TRAIN,
-  MOTORBIKE,
-  AIRPLANE,
-}
+import { TransportMode } from "../api";
 
 export function toHeaderTitle(mode: TransportMode) {
   switch (mode) {
-    case TransportMode.CAR:
+    case TransportMode.Car:
       return "Car details";
-    case TransportMode.TRAIN:
+    case TransportMode.Train:
       return "Train details";
-    case TransportMode.MOTORBIKE:
-      return "Motorbike details";
-    case TransportMode.AIRPLANE:
-      return "Airplane details";
     default:
       return "Transport details";
   }
@@ -22,14 +13,10 @@ export function toHeaderTitle(mode: TransportMode) {
 
 export function toInitialTitle(mode: TransportMode) {
   switch (mode) {
-    case TransportMode.CAR:
+    case TransportMode.Car:
       return "Car drive";
-    case TransportMode.TRAIN:
+    case TransportMode.Train:
       return "Train ride";
-    case TransportMode.MOTORBIKE:
-      return "Motorbike ride";
-    case TransportMode.AIRPLANE:
-      return "Airplane flight";
     default:
       return "";
   }

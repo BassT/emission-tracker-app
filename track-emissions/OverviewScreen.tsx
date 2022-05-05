@@ -4,11 +4,10 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Alert, FlatList, ImageBackground } from "react-native";
 import { FAB, IconButton, List } from "react-native-paper";
-import { ApiContext, ListResultItem } from "../api";
+import { ApiContext, ListResultItem, TransportMode } from "../api";
 import { AuthContext } from "../auth/AuthContext";
 import { MainNavigatorParamList, TrackEmissionsNavigatorParamList, TrackEmissionsScreenName } from "../navigation";
 import { theme } from "../theme";
-import { TransportMode } from "./TransportMode";
 
 export function OverviewScreen({
   navigation,
@@ -25,7 +24,14 @@ export function OverviewScreen({
     setLoading(true);
     try {
       const { result, errors } = await transportActivityAPI.listTransportAcitivites({
-        params: { totalEmissions: true, title: true, date: true, sortBy: "date", sortDirection: "DESC" },
+        params: {
+          totalEmissions: true,
+          title: true,
+          date: true,
+          transportMode: true,
+          sortBy: "date",
+          sortDirection: "DESC",
+        },
         options: {},
       });
       if (errors) console.error("Failed to fetch transport activities", { errors });
@@ -59,15 +65,15 @@ export function OverviewScreen({
     >
       <FlatList
         data={data}
-        renderItem={({ item: { id, title, totalEmissions, date } }) => (
+        renderItem={({ item: { id, title, totalEmissions, date, transportMode } }) => (
           <List.Item
             title={title}
-            left={() => <List.Icon icon="car" />}
+            left={() => <List.Icon icon={getIconName(transportMode)} />}
             description={renderDescription({ totalEmissions, date })}
             style={{ backgroundColor: theme.colors.surface }}
             onPress={() =>
               navigation.push(TrackEmissionsScreenName.TRANSPORT_DETAILS, {
-                mode: TransportMode.CAR,
+                mode: transportMode,
                 transportActivityId: id,
               })
             }
@@ -91,4 +97,14 @@ function renderDescription({ totalEmissions, date }: { totalEmissions?: number; 
   if (typeof totalEmissions === "number") return `${totalEmissions.toFixed(2)} kg CO2`;
   if (date) return `${new Date(date).toLocaleDateString()}`;
   return null;
+}
+
+function getIconName(transportMode?: TransportMode) {
+  if (transportMode === TransportMode.Car) {
+    return "car";
+  }
+  if (transportMode === TransportMode.Train) {
+    return "train";
+  }
+  return "help";
 }

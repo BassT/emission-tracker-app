@@ -48,6 +48,7 @@ export class TransportActivityAPI {
       totalEmissions?: boolean;
       title?: boolean;
       date?: boolean;
+      transportMode?: boolean;
       dateAfter?: Date;
       sortBy?: "date";
       sortDirection?: "ASC" | "DESC";
@@ -72,6 +73,9 @@ export class TransportActivityAPI {
     }
     if (params.date) {
       searchParams = [...searchParams, "date=true"];
+    }
+    if (params.transportMode) {
+      searchParams = [...searchParams, "transportMode=true"];
     }
     if (params.dateAfter) {
       searchParams = [...searchParams, `dateAfter=${params.dateAfter.toISOString()}`];
@@ -163,19 +167,7 @@ export class TransportActivityAPI {
     params,
     options,
   }: {
-    params: {
-      id: string;
-      title: string;
-      date: string;
-      distance: number;
-      specificEmissions: number;
-      fuelType: FuelType;
-      specificFuelConsumption: number;
-      totalFuelConsumption: number;
-      calcMode: CalcMode;
-      persons: number;
-      totalEmissions: number;
-    };
+    params: UpdateTransportActivityParams;
     options: Options;
   }): Promise<{ result?: TransportDetails; errors?: Error[] }> {
     if (typeof this.auth === "undefined") {
@@ -197,6 +189,7 @@ export class TransportActivityAPI {
         totalFuelConsumption: params.totalFuelConsumption,
         calcMode: params.calcMode,
         persons: params.persons,
+        capacityUtilization: params.capacityUtilization,
         totalEmissions: params.totalEmissions,
       }),
     });
@@ -260,16 +253,33 @@ export interface CreateTransportActivityParams {
   params: {
     title: string;
     date: string;
-    distance: number;
-    specificEmissions: number;
-    fuelType: FuelType;
-    specificFuelConsumption: number;
-    totalFuelConsumption: number;
     totalEmissions: number;
-    calcMode: CalcMode;
-    persons: number;
+    distance?: number;
+    specificEmissions?: number;
+    fuelType?: FuelType;
+    specificFuelConsumption?: number;
+    totalFuelConsumption?: number;
+    calcMode?: CalcMode;
+    persons?: number;
+    transportMode?: TransportMode;
+    capacityUtilization?: number;
   };
   options: Options;
+}
+
+interface UpdateTransportActivityParams {
+  id: string;
+  title: string;
+  date: string;
+  distance?: number;
+  specificEmissions?: number;
+  fuelType?: FuelType;
+  specificFuelConsumption?: number;
+  totalFuelConsumption?: number;
+  calcMode?: CalcMode;
+  persons?: number;
+  capacityUtilization?: number;
+  totalEmissions: number;
 }
 
 export interface ListResultItem {
@@ -277,20 +287,23 @@ export interface ListResultItem {
   totalEmissions?: number;
   title?: string;
   date?: string;
+  transportMode?: TransportMode;
 }
 
 export interface TransportDetails {
   id: string;
   title: string;
   date: string;
-  distance: number;
-  specificEmissions: number;
-  fuelType: FuelType;
-  specificFuelConsumption: number;
-  totalFuelConsumption: number;
-  calcMode: CalcMode;
-  persons: number;
   totalEmissions: number;
+  distance?: number;
+  specificEmissions?: number;
+  fuelType?: FuelType;
+  specificFuelConsumption?: number;
+  totalFuelConsumption?: number;
+  calcMode?: CalcMode;
+  persons?: number;
+  capacityUtilization?: number;
+  transportMode?: TransportMode;
   createdBy: string;
   createdAt: string;
   updatedAt?: string;
@@ -333,6 +346,11 @@ export enum FuelType {
   Gasoline = "Gasoline",
   LPG = "LPG",
   CNG = "CNG",
+}
+
+export enum TransportMode {
+  Car = "Car",
+  Train = "Train",
 }
 
 enum STATUS_CODE {

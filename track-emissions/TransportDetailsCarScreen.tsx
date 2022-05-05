@@ -6,7 +6,7 @@ import { startOfDay } from "date-fns";
 import React, { Reducer, useCallback, useContext, useReducer, useState } from "react";
 import { Alert, ImageBackground, View } from "react-native";
 import { Button, Card, Modal, Paragraph, Portal, ProgressBar, TextInput } from "react-native-paper";
-import { ApiContext, CalcMode, FuelType } from "../api";
+import { ApiContext, CalcMode, FuelType, TransportMode } from "../api";
 import {
   MainNavigatorParamList,
   MainScreenName,
@@ -24,7 +24,7 @@ import {
 import { toInitialTitle } from "./TransportMode";
 import { TotalFuelDetailsInput } from "./TransportDetailsCarScreen/TotalFuelDetailsInput";
 import { SpecificFuelDetailsInput } from "./TransportDetailsCarScreen/SpecificFuelDetailsInput";
-import { DeleteTransportActivityIcon } from "./TransportDetailsCarScreen/DeleteTransportActivityIcon";
+import { DeleteTransportActivityIcon } from "./shared/DeleteTransportActivityIcon";
 
 export function TransportDetailsCarScreen({
   navigation,
@@ -80,11 +80,14 @@ export function TransportDetailsCarScreen({
               setTitle(result.title);
               setDate(new Date(result.date));
               setDateString(new Date(result.date).toLocaleDateString());
-              setSpecificEmissions(result.specificEmissions.toFixed(2));
-              setDistance(result.distance.toFixed(2));
-              setPersons(result.persons.toString());
-              setTotalFuelConsumption(result.totalFuelConsumption.toFixed(2));
-              setSpecificFuelConsumption(result.specificFuelConsumption.toFixed(2));
+              if (typeof result.specificEmissions === "number")
+                setSpecificEmissions(result.specificEmissions.toFixed(2));
+              if (typeof result.distance === "number") setDistance(result.distance.toFixed(2));
+              if (typeof result.persons === "number") setPersons(result.persons.toString());
+              if (typeof result.totalFuelConsumption === "number")
+                setTotalFuelConsumption(result.totalFuelConsumption.toFixed(2));
+              if (typeof result.specificFuelConsumption === "number")
+                setSpecificFuelConsumption(result.specificFuelConsumption.toFixed(2));
               dispatchTotalEmissionsReducerAction({ type: "initialize", payload: result });
             }
           } catch (error) {
@@ -115,7 +118,12 @@ export function TransportDetailsCarScreen({
       try {
         setIsCreating(true);
         const { activityId, errors } = await transportActivityAPI.createTransportActivity({
-          params: { title, date: startOfDay(date).toISOString(), ...totalEmissionsReducerState },
+          params: {
+            title,
+            date: startOfDay(date).toISOString(),
+            transportMode: TransportMode.Car,
+            ...totalEmissionsReducerState,
+          },
           options: {},
         });
         if (errors) {
