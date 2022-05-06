@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { TextInput } from "react-native-paper";
 import { FuelType } from "../../api";
-import { FuelTypeButton } from "./FuelTypeButton";
+import { FuelTypeButton } from "../shared/FuelTypeButton";
 import { TotalEmissionReducerAction, TotalEmissionReducerState } from "./totalEmissionReducer";
 
 export function SpecificFuelDetailsInput({
@@ -27,8 +27,8 @@ export function SpecificFuelDetailsInput({
           <FuelTypeButton
             key={fuelType}
             fuelType={fuelType}
-            totalEmissionsReducerState={totalEmissionsReducerState}
-            dispatchTotalEmissionsReducerAction={dispatchTotalEmissionsReducerAction}
+            selectedFuelType={totalEmissionsReducerState.fuelType}
+            onChange={(fuelType) => dispatchTotalEmissionsReducerAction({ type: "setFuelType", payload: { fuelType } })}
           />
         ))}
       </View>

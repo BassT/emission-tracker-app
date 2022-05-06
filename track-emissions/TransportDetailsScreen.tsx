@@ -2,11 +2,10 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React from "react";
-import { View } from "react-native";
-import { Paragraph } from "react-native-paper";
 import { TransportMode } from "../api";
 import { MainNavigatorParamList, TrackEmissionsNavigatorParamList, TrackEmissionsScreenName } from "../navigation";
 import { TransportDetailsCarScreen } from "./TransportDetailsCarScreen";
+import { TransportDetailsTrainScreen } from "./TransportDetailsTrainScreen";
 
 /**
  * Renders different transport details screen variants based on transport mode.
@@ -22,11 +21,7 @@ export function TransportDetailsScreen({
     case TransportMode.Car:
       return <TransportDetailsCarScreen navigation={navigation} route={route} />;
     case TransportMode.Train:
-      return (
-        <View>
-          <Paragraph>TransportDetailsTrainScreen</Paragraph>
-        </View>
-      );
+      return <TransportDetailsTrainScreen navigation={navigation} route={route} />;
     default:
       return null;
   }

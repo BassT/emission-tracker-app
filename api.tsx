@@ -346,6 +346,7 @@ export enum FuelType {
   Gasoline = "Gasoline",
   LPG = "LPG",
   CNG = "CNG",
+  Electricity = "Electricity",
 }
 
 export enum TransportMode {
