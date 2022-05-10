@@ -189,7 +189,7 @@ export class TransportActivityAPI {
         totalFuelConsumption: params.totalFuelConsumption,
         calcMode: params.calcMode,
         persons: params.persons,
-        capacityUtilization: params.capacityUtilization,
+        trainType: params.trainType,
         totalEmissions: params.totalEmissions,
       }),
     });
@@ -262,12 +262,12 @@ export interface CreateTransportActivityParams {
     calcMode?: CalcMode;
     persons?: number;
     transportMode?: TransportMode;
-    capacityUtilization?: number;
+    trainType?: TrainType;
   };
   options: Options;
 }
 
-interface UpdateTransportActivityParams {
+export interface UpdateTransportActivityParams {
   id: string;
   title: string;
   date: string;
@@ -278,7 +278,7 @@ interface UpdateTransportActivityParams {
   totalFuelConsumption?: number;
   calcMode?: CalcMode;
   persons?: number;
-  capacityUtilization?: number;
+  trainType?: TrainType;
   totalEmissions: number;
 }
 
@@ -302,8 +302,8 @@ export interface TransportDetails {
   totalFuelConsumption?: number;
   calcMode?: CalcMode;
   persons?: number;
-  capacityUtilization?: number;
   transportMode?: TransportMode;
+  trainType?: TrainType;
   createdBy: string;
   createdAt: string;
   updatedAt?: string;
@@ -352,6 +352,11 @@ export enum FuelType {
 export enum TransportMode {
   Car = "Car",
   Train = "Train",
+}
+
+export enum TrainType {
+  Local = "Local",
+  LongDistance = "Long-Distance",
 }
 
 enum STATUS_CODE {

@@ -10,7 +10,7 @@ export function FuelTypeButton({
   style,
 }: {
   fuelType: FuelType;
-  selectedFuelType: FuelType;
+  selectedFuelType: FuelType | null;
   onChange: (fuelType: FuelType) => void;
   style?: StyleProp<ViewStyle>;
 }) {

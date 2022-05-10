@@ -1,4 +1,4 @@
-import DateTimePicker, { Event } from "@react-native-community/datetimepicker";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -6,7 +6,14 @@ import { startOfDay } from "date-fns";
 import React, { Reducer, useCallback, useContext, useEffect, useReducer, useState } from "react";
 import { Alert, ImageBackground, View } from "react-native";
 import { Button, Card, Modal, Paragraph, Portal, ProgressBar, TextInput } from "react-native-paper";
-import { ApiContext, FuelType, TransportMode } from "../api";
+import {
+  ApiContext,
+  CreateTransportActivityParams,
+  FuelType,
+  TrainType,
+  TransportMode,
+  UpdateTransportActivityParams,
+} from "../api";
 import {
   MainNavigatorParamList,
   MainScreenName,
@@ -39,6 +46,9 @@ export function TransportDetailsTrainScreen({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [isCustomSpecificEmissions, setIsCustomSpecificEmissions] = useState(false);
+  const [isCustomTotalEmissions, setIsCustomTotalEmissions] = useState(false);
+
   const [title, setTitle] = useState(toInitialTitle(mode));
   const [date, setDate] = useState(startOfDay(new Date()));
   const [dateString, setDateString] = useState(date.toLocaleDateString());
@@ -47,14 +57,12 @@ export function TransportDetailsTrainScreen({
   const [totalEmissions, setTotalEmissions] = useState("0.0");
   const [distance, setDistance] = useState("0.0");
 
-  const [isCustomSpecificEmissions, setIsCustomSpecificEmissions] = useState(false);
-  const [fuelType, setFuelType] = useState<FuelType.Electricity | FuelType.Diesel>(FuelType.Electricity);
-  const [trainType, setTrainType] = useState<TrainType>(TrainType.Local);
-
   const [state, dispatchAction] = useReducer<
     Reducer<TotalEmissionsTrainReducerState, TotalEmissionsTrainReducerAction>
   >(totalEmissionsTrainReducer, {
     distance: 0,
+    fuelType: null,
+    trainType: null,
     specificEmissions: 0,
     totalEmissions: 0,
   });
@@ -83,12 +91,20 @@ export function TransportDetailsTrainScreen({
               if (typeof result.specificEmissions === "number")
                 setSpecificEmissions(result.specificEmissions.toFixed(2));
               if (typeof result.distance === "number") setDistance(result.distance.toFixed(2));
+              if (!result.trainType || !result.fuelType) setIsCustomSpecificEmissions(true);
+              if (!result.specificEmissions) setIsCustomTotalEmissions(true);
+              setTotalEmissions(result.totalEmissions.toString());
               dispatchAction({
                 type: "initialize",
                 payload: {
                   distance: result.distance || 0,
+                  fuelType:
+                    result.fuelType === FuelType.Electricity || result.fuelType === FuelType.Diesel
+                      ? result.fuelType
+                      : null,
+                  trainType: result.trainType || null,
                   specificEmissions: result.specificEmissions || 0,
-                  totalEmissions: result.totalEmissions || 0,
+                  totalEmissions: result.totalEmissions,
                 },
               });
             }
@@ -119,10 +135,32 @@ export function TransportDetailsTrainScreen({
     const create = async () => {
       try {
         setIsCreating(true);
-        const { activityId, errors } = await transportActivityAPI.createTransportActivity({
-          params: { title, date: startOfDay(date).toISOString(), transportMode: TransportMode.Train, ...state },
+        let args: CreateTransportActivityParams = {
+          params: {
+            title,
+            date: startOfDay(date).toISOString(),
+            transportMode: TransportMode.Train,
+            totalEmissions: state.totalEmissions,
+          },
           options: {},
-        });
+        };
+        if (!isCustomTotalEmissions) {
+          args = {
+            ...args,
+            params: { ...args.params, distance: state.distance, specificEmissions: state.specificEmissions },
+          };
+        }
+        if (!isCustomSpecificEmissions) {
+          args = {
+            ...args,
+            params: {
+              ...args.params,
+              fuelType: state.fuelType ? state.fuelType : undefined,
+              trainType: state.trainType || undefined,
+            },
+          };
+        }
+        const { activityId, errors } = await transportActivityAPI.createTransportActivity(args);
         if (errors) {
           Alert.alert("Failed to create transport activity", JSON.stringify(errors, null, 2));
         }
@@ -148,15 +186,19 @@ export function TransportDetailsTrainScreen({
       if (!transportActivityId) return;
       try {
         setIsUpdating(true);
-        const { errors } = await transportActivityAPI.updateTransportActivity({
-          params: {
-            ...state,
-            id: transportActivityId,
-            title,
-            date: startOfDay(date).toISOString(),
-          },
-          options: {},
-        });
+        let params: UpdateTransportActivityParams = {
+          id: transportActivityId,
+          title,
+          date: startOfDay(date).toISOString(),
+          totalEmissions: state.totalEmissions,
+        };
+        if (!isCustomTotalEmissions) {
+          params = { ...params, distance: state.distance, specificEmissions: state.specificEmissions };
+        }
+        if (!isCustomSpecificEmissions) {
+          params = { ...params, fuelType: state.fuelType || undefined, trainType: state.trainType || undefined };
+        }
+        const { errors } = await transportActivityAPI.updateTransportActivity({ params, options: {} });
         if (errors) {
           Alert.alert("Failed to update transport activity", JSON.stringify(errors, null, 2));
         }
@@ -229,6 +271,7 @@ export function TransportDetailsTrainScreen({
                   value={distance}
                   onChangeText={(text) => {
                     setDistance(text);
+                    setIsCustomTotalEmissions(false);
                     if (!isNaN(parseFloat(text)))
                       dispatchAction({
                         type: "setDistance",
@@ -239,65 +282,47 @@ export function TransportDetailsTrainScreen({
                   selectTextOnFocus
                   right={<TextInput.Affix text="km" />}
                   error={isNaN(parseFloat(distance))}
-                  style={{ marginBottom: 8 }}
+                  style={{ marginBottom: 8, opacity: isCustomTotalEmissions ? 0.5 : 1 }}
+                  testID="distance"
                 />
                 <View style={{ display: "flex", flexDirection: "row", marginBottom: 8 }}>
-                  {[FuelType.Electricity, FuelType.Diesel].map((item) => {
+                  {[FuelType.Electricity, FuelType.Diesel].map((item) => (
                     <FuelTypeButton
                       key={item}
                       fuelType={item}
-                      selectedFuelType={fuelType}
+                      selectedFuelType={state.fuelType}
                       onChange={(value) => {
                         if (value === FuelType.Electricity || value === FuelType.Diesel) {
-                          setFuelType(value);
                           setIsCustomSpecificEmissions(false);
-                        }
-                      }}
-                      style={{ opacity: isCustomSpecificEmissions ? 0.5 : 1 }}
-                    />;
-                  })}
-                </View>
-                <View style={{ display: "flex", flexDirection: "row", marginBottom: 8 }}>
-                  {[FuelType.Electricity, FuelType.Diesel].map((item) => {
-                    <FuelTypeButton
-                      key={item}
-                      fuelType={item}
-                      selectedFuelType={fuelType}
-                      onChange={(value) => {
-                        // TS compiler can't figure this out itself, so we need this check
-                        if (value === FuelType.Electricity || value === FuelType.Diesel) {
-                          setFuelType(value);
-                          setIsCustomSpecificEmissions(false);
-                          setSpecificEmissions(getSpecificEmissions({ fuelType: value, trainType }).toFixed(2));
+                          setIsCustomTotalEmissions(false);
                           dispatchAction({
-                            type: "setSpecificEmissions",
-                            payload: { specificEmissions: getSpecificEmissions({ fuelType: value, trainType }) },
+                            type: "setFuelType",
+                            payload: { fuelType: value },
                           });
                         }
                       }}
-                      style={{ opacity: isCustomSpecificEmissions ? 0.75 : 1 }}
-                    />;
-                  })}
+                      style={{ opacity: isCustomSpecificEmissions || isCustomTotalEmissions ? 0.5 : 1 }}
+                    />
+                  ))}
                 </View>
                 <View style={{ display: "flex", flexDirection: "row", marginBottom: 8 }}>
-                  {[TrainType.Local, TrainType.Local].map((value) => {
+                  {[TrainType.Local, TrainType.LongDistance].map((value) => (
                     <Button
                       key={value}
-                      mode={trainType === value ? "contained" : "outlined"}
+                      mode={state.trainType === value ? "contained" : "outlined"}
                       onPress={() => {
-                        setTrainType(value);
                         setIsCustomSpecificEmissions(false);
-                        setSpecificEmissions(getSpecificEmissions({ fuelType, trainType: value }).toFixed(2));
+                        setIsCustomSpecificEmissions(false);
                         dispatchAction({
-                          type: "setSpecificEmissions",
-                          payload: { specificEmissions: getSpecificEmissions({ fuelType, trainType: value }) },
+                          type: "setTrainType",
+                          payload: { trainType: value },
                         });
                       }}
-                      style={{ opacity: isCustomSpecificEmissions ? 0.75 : 1 }}
+                      style={{ opacity: isCustomSpecificEmissions || isCustomTotalEmissions ? 0.5 : 1 }}
                     >
                       {value}
-                    </Button>;
-                  })}
+                    </Button>
+                  ))}
                 </View>
                 <TextInput
                   label="Specific emissions"
@@ -305,6 +330,7 @@ export function TransportDetailsTrainScreen({
                   onChangeText={(text) => {
                     setSpecificEmissions(text);
                     setIsCustomSpecificEmissions(true);
+                    setIsCustomTotalEmissions(false);
                     if (!isNaN(parseFloat(text)))
                       dispatchAction({
                         type: "setSpecificEmissions",
@@ -315,16 +341,17 @@ export function TransportDetailsTrainScreen({
                   selectTextOnFocus
                   right={<TextInput.Affix text="g CO2 / km" />}
                   error={isNaN(parseFloat(specificEmissions))}
-                  style={{ marginBottom: 8 }}
+                  style={{ marginBottom: 8, opacity: isCustomTotalEmissions ? 0.5 : 1 }}
+                  testID="specific-emissions"
                 />
                 <TextInput
                   label="Total emissions"
-                  value={totalEmissions}
+                  value={isCustomTotalEmissions ? totalEmissions : state.totalEmissions.toString()}
                   keyboardType="numeric"
                   selectTextOnFocus
                   onChangeText={(text) => {
+                    setIsCustomTotalEmissions(true);
                     setTotalEmissions(text);
-                    setIsCustomSpecificEmissions(true);
                     if (!isNaN(parseFloat(text)))
                       dispatchAction({
                         type: "setTotalEmissions",
@@ -333,6 +360,7 @@ export function TransportDetailsTrainScreen({
                   }}
                   right={<TextInput.Affix text="kg CO2" />}
                   style={{ marginBottom: 16 }}
+                  testID="total-emissions"
                 />
                 <View style={{ display: "flex", alignItems: "flex-end" }}>
                   <Button
@@ -351,7 +379,7 @@ export function TransportDetailsTrainScreen({
       {isDatePickerVisible ? (
         <DateTimePicker
           value={date}
-          onChange={(event: Event, date: Date | undefined) => {
+          onChange={(event: DateTimePickerEvent, date: Date | undefined) => {
             setIsDatePickerVisible(false);
             if (date) {
               setDate(date);
@@ -363,27 +391,4 @@ export function TransportDetailsTrainScreen({
       ) : null}
     </>
   );
-}
-
-function getSpecificEmissions({
-  fuelType,
-  trainType,
-}: {
-  fuelType: FuelType.Electricity | FuelType.Diesel;
-  trainType: TrainType;
-}) {
-  const kgPerPassengerKm = 0;
-  if (fuelType === FuelType.Electricity) {
-    if (trainType === TrainType.Local) return 0.0546; // kg/passenger-km (see also https://www.probas.umweltbundesamt.de/php/prozessdetails.php?id={F9C83447-3994-4B54-B7D7-A5E6B81C725E})
-    if (trainType === TrainType.LongDistance) return 0.00948; // kg/passenger-km (see also https://www.probas.umweltbundesamt.de/php/prozessdetails.php?id={A4FFA0CD-2550-4435-BBDE-00C6F1A0B22F})
-  } else if (fuelType === FuelType.Diesel) {
-    if (trainType === TrainType.Local) return 0.0713; // kg/passenger-km (see also https://www.probas.umweltbundesamt.de/php/prozessdetails.php?id={08984DE8-B8F1-46C1-824B-910FD9E8A023})
-    if (trainType === TrainType.LongDistance) return 0.044; // kg/passenger-km (see also https://www.probas.umweltbundesamt.de/php/prozessdetails.php?id={968DDFF4-52FF-4C77-8F1D-F21DD202C11C})
-  }
-  return kgPerPassengerKm * 1000; // g/passenger-km
-}
-
-enum TrainType {
-  Local = "Local",
-  LongDistance = "Long-Distance",
 }
