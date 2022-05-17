@@ -367,6 +367,7 @@ export function TransportDetailsTrainScreen({
                     onPress={handlePressSave}
                     disabled={isCreating || isUpdating || isDeleting}
                     loading={isCreating || isUpdating || isDeleting}
+                    testID="save"
                   >
                     Save
                   </Button>

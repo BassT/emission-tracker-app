@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import { startOfDay, startOfWeek } from "date-fns";
 import React, { EffectCallback } from "react";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -8,10 +8,9 @@ import {
   CreateTransportActivityParams,
   FuelType,
   TransportActivityAPI,
-  TransportDetails,
+  TransportMode,
 } from "../api";
 import { TransportDetailsCarScreen } from "./TransportDetailsCarScreen";
-import { TransportMode } from "./TransportMode";
 import * as ReactNavigationNative from "@react-navigation/native";
 
 jest.mock("@react-navigation/native");
@@ -31,10 +30,10 @@ describe(TransportDetailsCarScreen.name, () => {
       createTransportActivity: createTransportActivityMock,
     } as unknown as TransportActivityAPI;
     const navigation: any = {};
-    const route: any = { params: { mode: TransportMode.CAR } };
+    const route: any = { params: { mode: TransportMode.Car } };
 
     // Test
-    const { getByDisplayValue, getByText } = render(
+    const { getByDisplayValue, getByTestId } = render(
       <ApiContext.Provider value={{ transportActivityAPI, initialized: true }}>
         <PaperProvider>
           <TransportDetailsCarScreen navigation={navigation} route={route} />
@@ -43,7 +42,14 @@ describe(TransportDetailsCarScreen.name, () => {
     );
 
     fireEvent.changeText(getByDisplayValue("Car drive"), "Title");
-    fireEvent.press(getByText("Save"));
+    fireEvent.press(getByTestId("save"));
+
+    await waitFor(() => {
+      // The `Button` component, which testID `save`, from react-native-paper creates a tree of different native components.
+      // We can't check `disabled` or `loading` prop directly, because they're not assigned to the element with testID `save`.
+      // To check if the loading indicator, due to the save, disappears, we look at the `accessibilityState.disabled` prop.
+      return expect(getByTestId("save").props.accessibilityState.disabled).toBe(false);
+    });
 
     expect(createTransportActivityMock).toHaveBeenCalledTimes(1);
     const params: CreateTransportActivityParams = {
@@ -58,15 +64,18 @@ describe(TransportDetailsCarScreen.name, () => {
         title: "Title",
         totalEmissions: 0,
         totalFuelConsumption: 0,
+        transportMode: TransportMode.Car,
       },
       options: {},
     };
     expect(createTransportActivityMock).toHaveBeenCalledWith(params);
   });
 
+  // This test currently throws cryptic errors about "await act()...".
+  // There's a pull requests that a explains some of the background: https://github.com/callstack/react-native-testing-library/pull/969.
   it("should update transport activity correctly", async () => {
     // Setup
-    const initialDetails: TransportDetails = {
+    const initialDetails = {
       id: "transport-activity-123",
       calcMode: CalcMode.SpecificEmissions,
       date: startOfDay(new Date()).toISOString(),
@@ -75,11 +84,12 @@ describe(TransportDetailsCarScreen.name, () => {
       persons: 1,
       specificEmissions: 4,
       specificFuelConsumption: 0,
-      title: "Title",
+      title: "Initial title",
       totalEmissions: 0.016,
       totalFuelConsumption: 0,
       createdBy: "f4k3-1d",
       createdAt: startOfWeek(new Date()).toISOString(),
+      transportMode: TransportMode.Car,
     };
     const newTitle = "New title";
     const newPersons = 2;
@@ -91,10 +101,10 @@ describe(TransportDetailsCarScreen.name, () => {
       updateTransportActivity: updateTransportActivityMock,
     } as unknown as TransportActivityAPI;
     const navigation: any = { setOptions: () => undefined };
-    const route: any = { params: { mode: TransportMode.CAR, transportActivityId: initialDetails.id } };
+    const route: any = { params: { mode: TransportMode.Car, transportActivityId: initialDetails.id } };
 
     // Test
-    const { findByDisplayValue, getByDisplayValue, getByText } = render(
+    const { getByDisplayValue, getByTestId } = render(
       <ApiContext.Provider value={{ transportActivityAPI, initialized: true }}>
         <PaperProvider>
           <TransportDetailsCarScreen navigation={navigation} route={route} />
@@ -102,9 +112,18 @@ describe(TransportDetailsCarScreen.name, () => {
       </ApiContext.Provider>
     );
 
-    fireEvent.changeText(await findByDisplayValue(initialDetails.title), newTitle);
+    await waitFor(() => expect(getByTestId("title").props.value).toBe(initialDetails.title));
+
+    fireEvent.changeText(getByTestId("title"), newTitle);
     fireEvent.changeText(getByDisplayValue(initialDetails.persons.toString()), newPersons.toString());
-    fireEvent.press(getByText("Save"));
+    fireEvent.press(getByTestId("save"));
+
+    await waitFor(() => {
+      // The `Button` component, which testID `save`, from react-native-paper creates a tree of different native components.
+      // We can't check `disabled` or `loading` prop directly, because they're not assigned to the element with testID `save`.
+      // To check if the loading indicator, due to the save, disappears, we look at the `accessibilityState.disabled` prop.
+      return expect(getByTestId("save").props.accessibilityState.disabled).toBe(false);
+    });
 
     expect(getTransportActivityDetailsMock).toHaveBeenCalledTimes(1);
     expect(updateTransportActivityMock).toHaveBeenCalledTimes(1);

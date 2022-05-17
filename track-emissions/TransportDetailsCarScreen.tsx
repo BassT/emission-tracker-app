@@ -1,4 +1,4 @@
-import DateTimePicker, { Event } from "@react-native-community/datetimepicker";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -220,6 +220,7 @@ export function TransportDetailsCarScreen({
                   onChangeText={(text) => setTitle(text)}
                   style={{ marginBottom: 8 }}
                   selectTextOnFocus
+                  testID="title"
                 />
                 <TextInput
                   label="Date"
@@ -291,6 +292,7 @@ export function TransportDetailsCarScreen({
                     onPress={handlePressSave}
                     disabled={isCreating || isUpdating || isDeleting}
                     loading={isCreating || isUpdating || isDeleting}
+                    testID="save"
                   >
                     Save
                   </Button>
@@ -303,7 +305,7 @@ export function TransportDetailsCarScreen({
       {isDatePickerVisible ? (
         <DateTimePicker
           value={date}
-          onChange={(event: Event, date: Date | undefined) => {
+          onChange={(event: DateTimePickerEvent, date: Date | undefined) => {
             setIsDatePickerVisible(false);
             if (date) {
               setDate(date);

@@ -1,5 +1,5 @@
 import * as ReactNavigationNative from "@react-navigation/native";
-import { fireEvent, render } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import { startOfDay } from "date-fns";
 import React from "react";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -12,7 +12,7 @@ const useFocusEffectMock = jest.fn();
 ReactNavigationNativeMock.useFocusEffect = useFocusEffectMock;
 
 describe(TransportDetailsTrainScreen.name, () => {
-  it("should handle calculated total emissions properly", () => {
+  it("should handle calculated total emissions properly", async () => {
     const createMock = jest.fn().mockResolvedValue({ activityId: "test-123" });
     const transportActivityAPI = { createTransportActivity: createMock } as unknown as TransportActivityAPI;
 
@@ -31,8 +31,15 @@ describe(TransportDetailsTrainScreen.name, () => {
     fireEvent.press(getByText(FuelType.Diesel));
     fireEvent.changeText(getByTestId("distance"), "1.0");
     fireEvent.changeText(getByTestId("specific-emissions"), "10.5");
-
     fireEvent.press(getByText("Save"));
+
+    await waitFor(() => {
+      // The `Button` component, which testID `save`, from react-native-paper creates a tree of different native components.
+      // We can't check `disabled` or `loading` prop directly, because they're not assigned to the element with testID `save`.
+      // To check if the loading indicator, due to the save, disappears, we look at the `accessibilityState.disabled` prop.
+      return expect(getByTestId("save").props.accessibilityState.disabled).toBe(false);
+    });
+
     expect(createMock).toHaveBeenCalledTimes(1);
     expect(createMock).toHaveBeenCalledWith({
       options: {},
@@ -47,7 +54,7 @@ describe(TransportDetailsTrainScreen.name, () => {
     });
   });
 
-  it("should handle custom total emissions properly", () => {
+  it("should handle custom total emissions properly", async () => {
     const createMock = jest.fn().mockResolvedValue({ activityId: "test-123" });
     const transportActivityAPI = { createTransportActivity: createMock } as unknown as TransportActivityAPI;
 
@@ -64,8 +71,15 @@ describe(TransportDetailsTrainScreen.name, () => {
     );
 
     fireEvent.changeText(getByTestId("total-emissions"), "10.5");
-
     fireEvent.press(getByText("Save"));
+
+    await waitFor(() => {
+      // The `Button` component, which testID `save`, from react-native-paper creates a tree of different native components.
+      // We can't check `disabled` or `loading` prop directly, because they're not assigned to the element with testID `save`.
+      // To check if the loading indicator, due to the save, disappears, we look at the `accessibilityState.disabled` prop.
+      return expect(getByTestId("save").props.accessibilityState.disabled).toBe(false);
+    });
+
     expect(createMock).toHaveBeenCalledTimes(1);
     expect(createMock).toHaveBeenCalledWith({
       options: {},
