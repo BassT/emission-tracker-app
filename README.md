@@ -46,8 +46,8 @@ User authentication is implemented using [Azure AD B2C](https://docs.microsoft.c
 - Increment `android.versionCode` in `app.config.js`
 - Run `eas build --platform android --profile testing`
 - Wait for build process to finish
-- Download Android App Bundle from (expo.dev)[https://expo.dev]
-- Create testing release on (Google Play Console)[https://play.google.com/console]
+- Download Android App Bundle from [expo.dev](https://expo.dev)
+- Create testing release on [Google Play Console](https://play.google.com/console)
 
 ## For production release
 
@@ -55,5 +55,5 @@ User authentication is implemented using [Azure AD B2C](https://docs.microsoft.c
 - Optional: Increment `android.versionCode` in `app.config.js`
 - Run `eas build --platform android --profile production`
 - Wait for build process to finish
-- Download Android App Bundle from (expo.dev)[https://expo.dev]
-- Create release on (Google Play Console)[https://play.google.com/console]
+- Download Android App Bundle from [expo.dev](https://expo.dev)
+- Create release on [Google Play Console](https://play.google.com/console)
