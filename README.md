@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="400px" src="https://github.com/BassT/emission-tracker-app/blob/master/assets/google%20play%20store%20listing/feature%20graphic.png">
+  <img width="400px" src="https://github.com/BassT/emission-tracker-app/blob/master/assets/google%20play%20store%20listing/feature%20graphic%20only%20name.png">
 </p>
 
 <p align="center">
