@@ -1,3 +1,5 @@
+**Notes on archiving**: I'm currently not convinced anymore that (personal) carbon accounting is a very effective solution to addresse climate change. Carbon accounting is very hard to get right and even harder to build a great user experience for it.
+
 <p align="center">
   <img width="400px" src="https://github.com/BassT/emission-tracker-app/blob/master/assets/google%20play%20store%20listing/feature%20graphic%20only%20name.png">
 </p>
